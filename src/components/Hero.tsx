@@ -103,7 +103,7 @@ export function Hero({ onExploreClick, onOpenRadar }: HeroProps) {
                 onClick={scrollToProducts}
                 className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-8 py-4 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 text-base group"
               >
-                <span>استكشف المنتجات الـ 500</span>
+                <span>استكشف المنتجات الـ 100</span>
                 <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
               </button>
 
@@ -120,7 +120,7 @@ export function Hero({ onExploreClick, onOpenRadar }: HeroProps) {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
               
               <div className="bg-white/80 backdrop-blur-xs p-5 rounded-2xl border border-gray-200/80 shadow-xs text-center">
-                <div className="text-3xl font-black text-indigo-600 mb-1">500+</div>
+                <div className="text-3xl font-black text-indigo-600 mb-1">100+</div>
                 <div className="text-xs font-bold text-gray-700">أداة SaaS مبرمجة</div>
                 <div className="text-[11px] text-gray-400 mt-0.5">جاهزة للتجربة والتشغيل</div>
               </div>
@@ -435,7 +435,7 @@ export function Hero({ onExploreClick, onOpenRadar }: HeroProps) {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-6">
           <h2 className="text-3xl sm:text-4xl font-black">جاهز لإطلاق مشروعك الرقمي القادم؟</h2>
           <p className="text-indigo-100 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
-            اختر من بين 500 أداة جاهزة، جربها حياً، وامتلك كودها المصدري مدى الحياة في دقائق معدودة.
+            اختر من بين 100 أداة جاهزة، جربها حياً، وامتلك كودها المصدري مدى الحياة في دقائق معدودة.
           </p>
           <button
             onClick={scrollToProducts}

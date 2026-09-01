@@ -20,7 +20,57 @@ export function AdminDashboard({
   onDeleteProduct,
   onUpdateOrderStatus
 }: Props) {
-  const [activeTab, setActiveTab] = useState<'products' | 'orders'>('orders');
+  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'coupons'>('orders');
+  const [coupons, setCoupons] = useState<any[]>([]);
+  const [couponCode, setCouponCode] = useState('');
+  const [discountPercent, setDiscountPercent] = useState('');
+  
+  useEffect(() => {
+    if (activeTab === 'coupons') {
+      fetchCoupons();
+    }
+  }, [activeTab]);
+
+  const fetchCoupons = async () => {
+    try {
+      const { auth } = await import('../lib/firebase');
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) return;
+      const res = await fetch('/api/coupons', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setCoupons(await res.json());
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleCreateCoupon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!couponCode || !discountPercent) return;
+    try {
+      const { auth } = await import('../lib/firebase');
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) return;
+      const res = await fetch('/api/coupons', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({ code: couponCode, discountPercent })
+      });
+      if (res.ok) {
+        setCouponCode('');
+        setDiscountPercent('');
+        fetchCoupons();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCat, setSelectedCat] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -140,6 +190,18 @@ export function AdminDashboard({
               >
                 <Layers size={15} />
                 <span>الكتالوج والأدوات ({products.length})</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('coupons')}
+                className={`px-4 py-2 rounded-lg transition-all flex items-center gap-1.5 ${
+                  activeTab === 'coupons'
+                    ? 'bg-indigo-900 text-white shadow-sm'
+                    : 'text-gray-700 hover:text-gray-900'
+                }`}
+              >
+                <DollarSign size={15} />
+                <span>الكوبونات والخصومات</span>
               </button>
             </div>
 
@@ -443,6 +505,88 @@ export function AdminDashboard({
           </div>
 
         </div>
+        )}
+
+        {/* Tab 3: Coupons Management */}
+        {activeTab === 'coupons' && (
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-xs p-6 overflow-hidden">
+            <h3 className="text-lg font-black text-gray-900 mb-4">إنشاء كود خصم جديد</h3>
+            <form onSubmit={handleCreateCoupon} className="flex flex-col sm:flex-row gap-4 items-end mb-8">
+              <div className="flex-1 w-full">
+                <label className="font-bold text-gray-700 text-xs block mb-1.5">كود الخصم (مثال: EID20):</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="الكود بحروف إنجليزية"
+                  value={couponCode}
+                  onChange={e => setCouponCode(e.target.value.toUpperCase())}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm font-mono text-gray-900 outline-none focus:ring-2 focus:ring-indigo-500 uppercase"
+                />
+              </div>
+              <div className="w-full sm:w-32">
+                <label className="font-bold text-gray-700 text-xs block mb-1.5">نسبة الخصم %:</label>
+                <input
+                  type="number"
+                  required
+                  min="1"
+                  max="100"
+                  placeholder="20"
+                  value={discountPercent}
+                  onChange={e => setDiscountPercent(e.target.value)}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm text-sm h-[46px]"
+              >
+                <Plus size={16} />
+                <span>إضافة</span>
+              </button>
+            </form>
+
+            <h3 className="text-lg font-black text-gray-900 mb-4">الكوبونات النشطة</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-right text-xs">
+                <thead className="bg-gray-50 text-gray-500 font-bold border-b border-gray-200">
+                  <tr>
+                    <th className="p-4">الكود</th>
+                    <th className="p-4">نسبة الخصم</th>
+                    <th className="p-4">مرات الاستخدام</th>
+                    <th className="p-4">الحالة</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {coupons.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="p-8 text-center text-gray-500">لا توجد كوبونات مضافة بعد</td>
+                    </tr>
+                  ) : (
+                    coupons.map(coupon => (
+                      <tr key={coupon.id} className="hover:bg-gray-50/80 transition-colors">
+                        <td className="p-4 font-mono font-black text-indigo-700 text-sm">
+                          {coupon.code}
+                        </td>
+                        <td className="p-4 font-bold text-emerald-600 text-sm">
+                          {coupon.discountPercent}%
+                        </td>
+                        <td className="p-4 font-bold text-gray-700">
+                          {coupon.usageCount}
+                        </td>
+                        <td className="p-4">
+                          {coupon.isActive === 1 ? (
+                            <span className="bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full font-bold text-[10px]">مفعل</span>
+                          ) : (
+                            <span className="bg-red-50 text-red-700 px-2.5 py-1 rounded-full font-bold text-[10px]">معطل</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         )}
 
       </div>

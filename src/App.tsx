@@ -24,6 +24,9 @@ import { auth, googleProvider } from './lib/firebase';
 import { signInWithPopup, signOut, onAuthStateChanged, User } from 'firebase/auth';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { ProductPage } from './pages/ProductPage';
+import { Blog } from './pages/Blog';
+import { BlogPost } from './pages/BlogPost';
+import { SupportChatbot } from './components/SupportChatbot';
 
 export default function App() {
   return (
@@ -197,7 +200,7 @@ function MainApp() {
     }
   };
 
-  const handleNavigate = (view: 'landing' | 'home' | 'library' | 'local-sellers' | 'admin' | 'tracking') => {
+  const handleNavigate = (view: 'landing' | 'home' | 'library' | 'local-sellers' | 'admin' | 'tracking' | 'blog') => {
     if ((view === 'library' || view === 'local-sellers') && !isLoggedIn) {
       handleLogin();
       return;
@@ -210,6 +213,7 @@ function MainApp() {
       case 'local-sellers': navigate('/local-sellers'); break;
       case 'admin': navigate('/admin'); break;
       case 'tracking': navigate('/tracking'); break;
+      case 'blog': navigate('/blog'); break;
       default: navigate('/'); break;
     }
   };
@@ -219,7 +223,8 @@ function MainApp() {
                       location.pathname === '/library' ? 'library' :
                       location.pathname === '/local-sellers' ? 'local-sellers' :
                       location.pathname === '/admin' ? 'admin' :
-                      location.pathname === '/tracking' ? 'tracking' : 'home';
+                      location.pathname === '/tracking' ? 'tracking' :
+                      location.pathname.startsWith('/blog') ? 'blog' : 'home';
 
   const handleAddProduct = (newProduct: Product) => {
     setProductsList(prev => {
@@ -334,6 +339,9 @@ function MainApp() {
               onOrderCreated={handleOrderCreated}
             />
           } />
+          
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
           
           <Route path="/store" element={
             <>
@@ -555,6 +563,9 @@ function MainApp() {
         products={productsList}
         onSelectProduct={(prod) => setSelectedProduct(prod)}
       />
+
+      {/* AI Support Chatbot */}
+      <SupportChatbot />
     </div>
   );
 }

@@ -14,8 +14,8 @@ import {
 import { useCurrency } from '../context/CurrencyContext';
 
 interface HeaderProps {
-  currentView?: 'landing' | 'home' | 'library' | 'local-sellers' | 'admin' | 'tracking';
-  onNavigate?: (view: 'landing' | 'home' | 'library' | 'local-sellers' | 'admin' | 'tracking') => void;
+  currentView?: 'landing' | 'home' | 'library' | 'local-sellers' | 'admin' | 'tracking' | 'blog';
+  onNavigate?: (view: 'landing' | 'home' | 'library' | 'local-sellers' | 'admin' | 'tracking' | 'blog') => void;
   isLoggedIn?: boolean;
   onLogin?: () => void;
   onLogout?: () => void;
@@ -61,6 +61,15 @@ export function Header({
               }`}
             >
               صفحة الهبوط
+            </button>
+
+            <button 
+              onClick={() => onNavigate?.('blog')} 
+              className={`font-bold transition-colors text-xs sm:text-sm flex items-center gap-1 ${
+                currentView === 'blog' ? 'text-indigo-600' : 'text-gray-600 hover:text-indigo-600'
+              }`}
+            >
+              المدونة
             </button>
 
             <button 

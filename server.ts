@@ -79,6 +79,69 @@ async function startServer() {
     }
   });
 
+  // Admin: Get all coupons
+  app.get('/api/coupons', requireAuth, async (req, res) => {
+    try {
+      const allCoupons = await db.select().from(coupons).orderBy(desc(coupons.createdAt));
+      res.json(allCoupons);
+    } catch (error) {
+      console.error('Failed to fetch coupons:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Admin: Create new coupon
+  app.post('/api/coupons', requireAuth, async (req, res) => {
+    try {
+      const { code, discountPercent } = req.body;
+      if (!code || !discountPercent) return res.status(400).json({ error: 'Missing data' });
+      
+      const newCoupon = await db.insert(coupons).values({
+        code: code.toUpperCase(),
+        discountPercent: parseInt(discountPercent),
+        isActive: 1
+      }).returning();
+      
+      res.json(newCoupon[0]);
+    } catch (error) {
+      console.error('Failed to create coupon:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // AI Support Chatbot
+  app.post('/api/chat', async (req, res) => {
+    try {
+      const { message } = req.body;
+      if (!message || !genAI) {
+        return res.json({ reply: 'عذراً، نظام الذكاء الاصطناعي غير متوفر حالياً.' });
+      }
+
+      const prompt = `
+أنت المساعد الذكي لمتجر Micro SaaS. مهمتك الرد على أسئلة العملاء بلباقة، بلهجة مصرية احترافية.
+التفاصيل المهمة للمتجر:
+- جميع الأكواد المصدرية غير مشفرة (Open Source).
+- يحصل العميل على ترخيص تجاري مدى الحياة.
+- التسليم يتم خلال 24 ساعة من الشراء.
+- يوجد خدمة تركيب سحابي مقابل 20 دولار أو ما يعادله.
+- الدفع متاح عبر Stripe أو Instapay/Vodafone Cash في مصر.
+
+سؤال العميل: "${message}"
+
+أجب باختصار وبشكل مباشر:`;
+
+      const response = await genAI.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt
+      });
+
+      res.json({ reply: response.text });
+    } catch (error) {
+      console.error('Chat AI Error:', error);
+      res.status(500).json({ error: 'Failed to generate response' });
+    }
+  });
+
   // Create Stripe Checkout Session
   app.post('/api/create-checkout-session', requireAuth, async (req: AuthRequest, res) => {
     try {

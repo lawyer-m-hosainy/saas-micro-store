@@ -81,7 +81,7 @@ export function Hero({ onExploreClick, onOpenRadar }: HeroProps) {
             {/* Top Pill */}
             <div className="inline-flex items-center gap-2 bg-indigo-100/80 border border-indigo-200/60 text-indigo-900 text-xs font-bold px-4 py-1.5 rounded-full mb-6 shadow-xs animate-in fade-in slide-in-from-top-3">
               <Sparkles size={14} className="text-indigo-600 animate-pulse" />
-              <span>المنصة الأولى لأدوات المايكرو ساس الجاهزة بالكامل | 500+ أداة برمجية</span>
+              <span>المنصة الأولى لأدوات المايكرو ساس الجاهزة بالكامل | 100+ أداة برمجية فريدة</span>
             </div>
 
             {/* Display Headline */}
@@ -94,7 +94,7 @@ export function Hero({ onExploreClick, onOpenRadar }: HeroProps) {
 
             {/* Subheading */}
             <p className="text-base sm:text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto mb-10">
-              تصفح مكتبة ضخمة من تطبيقات <strong className="text-gray-900 font-bold">Micro SaaS</strong> المطورة بالذكاء الاصطناعي. جرب الأداة حياً، اطلع على الكود المصدري، واحصل على الملكية التجارية الكاملة بدون أي اشتراكات شهرية متكررة.
+              تصفح مكتبة ضخمة من تطبيقات <strong className="text-gray-900 font-bold">Micro SaaS</strong> المطورة بالذكاء الاصطناعي. جرب الأداة حياً، اطلع على هيكل الكود، واحصل على الملكية التجارية الكاملة بدون أي اشتراكات شهرية متكررة.
             </p>
 
             {/* CTA Buttons */}
@@ -161,7 +161,7 @@ export function Hero({ onExploreClick, onOpenRadar }: HeroProps) {
               كيف تبدأ مع سوق ساس في 3 خطوات؟
             </h2>
             <p className="text-gray-500 text-sm sm:text-base">
-              صممنا تجربة تضمن لك الشفافية التامة؛ لا تشتري أداة دون أن تجرب مدخلاتها وتطلع على كودها المصدري أولاً.
+              صممنا تجربة تضمن لك الشفافية التامة؛ لا تشتري أداة دون أن تجرب مدخلاتها وترى لمحة من هيكلها أولاً.
             </p>
           </div>
 
@@ -175,7 +175,7 @@ export function Hero({ onExploreClick, onOpenRadar }: HeroProps) {
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">اختر الأداة وجربها حياً</h3>
                 <p className="text-gray-600 text-xs sm:text-sm leading-relaxed mb-4">
-                  تصفح أي أداة من الـ 500، اضغط على "تجربة حية" لتجربتها ببياناتك الفعلية أو بنماذج تجريبية وتطلع على الكود المصدري قبل الشراء.
+                  تصفح أي أداة من أدواتنا المميزة، اضغط على "تجربة حية" لتجربتها ببياناتك الفعلية قبل الشراء.
                 </p>
               </div>
               <div className="text-xs font-bold text-indigo-600 flex items-center gap-1">

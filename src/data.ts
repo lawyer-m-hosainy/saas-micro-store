@@ -1057,51 +1057,5 @@ const baseProducts: Product[] = [
   }
 ];
 
-// وظيفة مساعدة لتوليد باقي المنتجات (لتصل المنصة لأكثر من 500 أداة SaaS جاهزة)
-const generateMockProducts = (count: number): Product[] => {
-  // Seeded PRNG for deterministic product generation
-  let seed = 42;
-  const seededRandom = () => {
-    seed = (seed * 16807 + 0) % 2147483647;
-    return (seed - 1) / 2147483646;
-  };
-  
-  const icons = ['Box', 'Zap', 'Cpu', 'Activity', 'BarChart', 'Cloud', 'Code', 'Database', 'Globe', 'Layers', 'Layout', 'Settings', 'Smartphone', 'Tool', 'TrendingUp'];
-  const prefixes = ['نظام', 'أداة', 'منصة', 'مُولد', 'مُحسن', 'مدير', 'تطبيق', 'مُحلل', 'محرك', 'رادار', 'مساعد'];
-  const niches = [
-    'البيانات الضخمة', 'الصور التوضيحية', 'المبيعات التلقائية', 'التقارير المالية', 
-    'المهام السريعة', 'العملاء المستهدفين', 'الموظفين', 'المحتوى الجذاب', 
-    'الإعلانات الممولة', 'الروابط الذكية', 'الأمان السيبراني', 'العقود الرقمية',
-    'الفواتير الذكية', 'الرعاية الصحية', 'اللوجستيات', 'العقارات', 'التجارة الإلكترونية'
-  ];
-  
-  const mockProducts: Product[] = [];
-  const categoryList = categories.filter(c => c.id !== 'all');
-  
-  for (let i = 1; i <= count; i++) {
-    const randomCategory = categoryList[Math.floor(seededRandom() * categoryList.length)].id;
-    const randomIcon = icons[Math.floor(seededRandom() * icons.length)];
-    const prefix = prefixes[Math.floor(seededRandom() * prefixes.length)];
-    const niche = niches[Math.floor(seededRandom() * niches.length)];
-    
-    mockProducts.push({
-      id: `gen-product-${i}`,
-      title: `${prefix} ${niche} الذكي (${i})`,
-      description: `أداة احترافية خفيفة مصممة خصيصاً لتسهيل إدارة وتطوير ${niche} لمشروعك بكفاءة عالية وبدون اشتراك شهري.`,
-      price: Math.floor(seededRandom() * 50) + 15,
-      categoryId: randomCategory,
-      features: [
-        'واجهة استخدام بسيطة وعصرية',
-        'كود مصدري نظيف وقابل للتعديل (.ZIP)',
-        'يعمل بدون إنترنت للحفاظ على الخصوصية',
-        'ترخيص تجاري ومدى الحياة للبيع'
-      ],
-      icon: randomIcon
-    });
-  }
-  return mockProducts;
-};
-
-// دمج المنتجات الأساسية الـ 90+ مع المنتجات المولدة ليصبح المجموع أكثر من 500 أداة
-export const products: Product[] = [...baseProducts, ...generateMockProducts(410)];
+export const products: Product[] = [...baseProducts];
 

@@ -2,7 +2,6 @@ import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import cors from 'cors';
-import Stripe from 'stripe';
 import { createServer as createViteServer } from 'vite';
 import { requireAuth, AuthRequest } from './src/middleware/auth';
 import { getOrCreateUser } from './src/db/users';
@@ -11,18 +10,6 @@ import { purchases, users, reviews, coupons } from './src/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { GoogleGenAI } from '@google/genai';
 import { products as catalogProducts } from './src/data.js';
-
-let stripeClient: Stripe | null = null;
-function getStripe(): Stripe {
-  if (!stripeClient) {
-    const key = process.env.STRIPE_SECRET_KEY;
-    if (!key) {
-      throw new Error('STRIPE_SECRET_KEY environment variable is required. Please set it in AI Studio settings.');
-    }
-    stripeClient = new Stripe(key);
-  }
-  return stripeClient;
-}
 
 const genAI = process.env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY, httpOptions: { headers: { 'User-Agent': 'aistudio-build' } } }) : null;
 
@@ -142,108 +129,7 @@ async function startServer() {
     }
   });
 
-  // Create Stripe Checkout Session
-  app.post('/api/create-checkout-session', requireAuth, async (req: AuthRequest, res) => {
-    try {
-      const user = req.user!;
-      const { productId, productTitle, price, currency = 'egp', displayPrice, couponCode } = req.body;
-      
-      if (!productId || !productTitle || !price) {
-        return res.status(400).json({ error: 'Missing product details' });
-      }
 
-      const catalogProduct = catalogProducts.find(p => p.id === productId);
-      if (!catalogProduct) return res.status(404).json({ error: 'Product not found' });
-      const canonicalPrice = catalogProduct.price;
-
-      const stripe = getStripe();
-      const origin = req.headers.origin || process.env.APP_URL || 'http://localhost:3000';
-
-      const isEgp = currency.toLowerCase() === 'egp';
-      const selectedCurrency = isEgp ? 'egp' : 'usd';
-      
-      // Calculate base charge amount
-      let chargeAmount = isEgp && displayPrice 
-        ? Math.round(displayPrice * 100) 
-        : Math.round(canonicalPrice * 100);
-
-      // Apply coupon if provided
-      let appliedDiscountPercent = 0;
-      if (couponCode) {
-        const couponRecord = await db.select().from(coupons).where(and(eq(coupons.code, couponCode.toUpperCase()), eq(coupons.isActive, 1))).limit(1);
-        if (couponRecord.length > 0) {
-          appliedDiscountPercent = couponRecord[0].discountPercent;
-          chargeAmount = Math.round(chargeAmount * (1 - appliedDiscountPercent / 100));
-          
-          // Increment usage count for the coupon
-          await db.update(coupons).set({ usageCount: couponRecord[0].usageCount + 1 }).where(eq(coupons.id, couponRecord[0].id));
-        }
-      }
-
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
-        line_items: [{
-          price_data: {
-            currency: selectedCurrency,
-            product_data: {
-              name: productTitle,
-            },
-            unit_amount: chargeAmount,
-          },
-          quantity: 1,
-        }],
-        mode: 'payment',
-        success_url: `${origin}/?success=true&session_id={CHECKOUT_SESSION_ID}&product_id=${productId}`,
-        cancel_url: `${origin}/?canceled=true`,
-        client_reference_id: user.uid,
-        metadata: {
-          productId,
-          userId: user.uid,
-          currency: selectedCurrency
-        }
-      });
-
-      res.json({ url: session.url });
-    } catch (error: any) {
-      console.error('Failed to create checkout session:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  });
-
-  // Verify Checkout Session and Record Purchase
-  app.post('/api/verify-session', requireAuth, async (req: AuthRequest, res) => {
-    try {
-      const user = req.user!;
-      const { session_id, product_id } = req.body;
-
-      if (!session_id || !product_id) {
-        return res.status(400).json({ error: 'Missing session or product details' });
-      }
-
-      const stripe = getStripe();
-      const session = await stripe.checkout.sessions.retrieve(session_id);
-
-      if (session.payment_status === 'paid' && session.client_reference_id === user.uid && session.metadata?.productId === product_id) {
-        // Check if already recorded
-        const existing = await db.select().from(purchases).where(
-          and(eq(purchases.userId, user.uid), eq(purchases.productId, product_id))
-        );
-
-        if (existing.length === 0) {
-          await db.insert(purchases).values({
-            userId: user.uid,
-            productId: product_id,
-          });
-        }
-        res.json({ success: true });
-      } else {
-        res.status(400).json({ error: 'Payment not successful or unauthorized' });
-      }
-    } catch (error: any) {
-      console.error('Failed to verify session:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  });
 
   // Get product reviews
   app.get('/api/reviews/:productId', async (req, res) => {

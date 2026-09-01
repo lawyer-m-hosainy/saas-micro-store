@@ -138,28 +138,7 @@ function MainApp() {
             }
           });
 
-          // Check if returning from Stripe checkout
-          const params = new URLSearchParams(window.location.search);
-          const sessionId = params.get('session_id');
-          const productId = params.get('product_id');
-          const success = params.get('success');
 
-          if (success === 'true' && sessionId && productId) {
-            const verifyRes = await fetch('/api/verify-session', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-              },
-              body: JSON.stringify({ session_id: sessionId, product_id: productId })
-            });
-
-            if (verifyRes.ok) {
-              navigate('/library');
-              // Clear URL params
-              window.history.replaceState({}, document.title, window.location.pathname);
-            }
-          }
 
           // Fetch user's purchases
           const res = await fetch('/api/purchases', {

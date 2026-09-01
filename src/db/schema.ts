@@ -15,7 +15,6 @@ export const purchases = pgTable('purchases', {
   id: serial('id').primaryKey(),
   userId: text('user_id').references(() => users.id).notNull(),
   productId: text('product_id').notNull(),
-  stripeSessionId: text('stripe_session_id'),
   amount: integer('amount'),
   currency: text('currency'),
   purchasedAt: timestamp('purchased_at').defaultNow().notNull(),

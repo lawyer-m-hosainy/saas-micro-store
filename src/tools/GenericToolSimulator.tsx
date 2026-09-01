@@ -228,7 +228,7 @@ export default function ${safeName}App() {
             }`}
           >
             <FileCode2 size={14} />
-            الكود المصدري (Source Code)
+            لمحة من الكود (مصداقية)
           </button>
         </div>
       </div>
@@ -383,26 +383,37 @@ export default function ${safeName}App() {
 
         </div>
       ) : (
-        /* Source Code Viewer Mode */
-        <div className="p-6 flex flex-col flex-grow">
-          <div className="bg-gray-900 rounded-2xl border border-gray-800 shadow-xl overflow-hidden flex flex-col flex-grow text-left" dir="ltr">
-            <div className="bg-gray-950 px-4 py-2.5 border-b border-gray-800 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-red-500/80"></span>
-                <span className="w-3 h-3 rounded-full bg-yellow-500/80"></span>
-                <span className="w-3 h-3 rounded-full bg-green-500/80"></span>
-                <span className="text-xs font-mono text-gray-400 ml-2">{product.id}.tsx</span>
-              </div>
-              <button
-                onClick={copySourceCode}
-                className="flex items-center gap-1.5 text-xs font-mono bg-gray-800 hover:bg-gray-700 text-gray-200 px-3 py-1.5 rounded-lg transition"
-              >
-                {sourceCopied ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
-                {sourceCopied ? 'Copied!' : 'Copy Code'}
-              </button>
+        /* Source Code Viewer Mode (LOCKED) */
+        <div className="p-6 flex flex-col flex-grow relative">
+          <div className="bg-gray-900 rounded-2xl border border-gray-800 shadow-xl overflow-hidden flex flex-col flex-grow text-left relative" dir="ltr">
+            <div className="bg-gray-950 px-4 py-2.5 border-b border-gray-800 flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-red-500/80"></span>
+              <span className="w-3 h-3 rounded-full bg-yellow-500/80"></span>
+              <span className="w-3 h-3 rounded-full bg-green-500/80"></span>
+              <span className="text-xs font-mono text-gray-400 ml-2">{product.id}.tsx</span>
             </div>
-            <pre className="p-5 text-xs font-mono text-emerald-400 overflow-x-auto overflow-y-auto max-h-[500px] leading-relaxed">
-              <code>{generatedStandaloneCode}</code>
+            
+            <pre className="p-5 text-xs font-mono text-emerald-400 overflow-hidden max-h-[400px] leading-relaxed select-none relative">
+              {/* Show only top 12 lines clearly */}
+              <code>{generatedStandaloneCode.split('\n').slice(0, 12).join('\n')}</code>
+              
+              {/* Blurred lines below */}
+              <code className="blur-sm opacity-50 block mt-1 pointer-events-none">
+                {generatedStandaloneCode.split('\n').slice(12, 30).join('\n')}
+              </code>
+              
+              {/* Locked overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/80 to-transparent flex flex-col items-center justify-end pb-16 z-10">
+                <div className="bg-white/10 p-4 rounded-2xl backdrop-blur-md border border-white/20 text-center max-w-sm">
+                  <div className="w-12 h-12 bg-indigo-500/20 text-indigo-300 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <FileCode2 size={24} />
+                  </div>
+                  <h3 className="text-white font-bold mb-2 font-sans" dir="rtl">الملف المصدري محمي بالكامل</h3>
+                  <p className="text-gray-300 text-xs font-sans mb-4 leading-relaxed" dir="rtl">
+                    هذه لمحة بسيطة من هيكل الكود لإثبات الجودة والمصداقية. لشراء الكود المصدري كاملاً (غير مشفر) مع حقوق الملكية، يرجى إتمام عملية الدفع.
+                  </p>
+                </div>
+              </div>
             </pre>
           </div>
         </div>

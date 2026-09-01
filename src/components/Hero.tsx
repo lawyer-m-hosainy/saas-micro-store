@@ -191,7 +191,7 @@ export function Hero({ onExploreClick, onOpenRadar }: HeroProps) {
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">شراء لمرة واحدة مدى الحياة</h3>
                 <p className="text-gray-600 text-xs sm:text-sm leading-relaxed mb-4">
-                  ادفع بأمان عبر Stripe بضغطة زر واحدة بدون أي رسوم اشتراك شهرية متكررة أو قيود على عدد الاستخدامات.
+                  ادفع بأمان عبر إنستاباي أو المحافظ الإلكترونية بضغطة زر واحدة بدون أي رسوم اشتراك شهرية متكررة أو قيود على عدد الاستخدامات.
                 </p>
               </div>
               <div className="text-xs font-bold text-emerald-600 flex items-center gap-1">

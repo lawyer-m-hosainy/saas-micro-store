@@ -7,7 +7,7 @@ import { createServer as createViteServer } from 'vite';
 import { requireAuth, AuthRequest } from './src/middleware/auth';
 import { getOrCreateUser } from './src/db/users';
 import { db } from './src/db';
-import { purchases, users, reviews } from './src/db/schema';
+import { purchases, users, reviews, coupons } from './src/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { GoogleGenAI } from '@google/genai';
 import { products as catalogProducts } from './src/data.js';
@@ -59,11 +59,31 @@ async function startServer() {
     }
   });
 
+  // Validate Coupon
+  app.get('/api/coupons/validate', async (req, res) => {
+    try {
+      const code = req.query.code as string;
+      if (!code) return res.status(400).json({ error: 'Coupon code required' });
+
+      // Check if coupon exists and is active
+      const couponRecord = await db.select().from(coupons).where(and(eq(coupons.code, code.toUpperCase()), eq(coupons.isActive, 1))).limit(1);
+      
+      if (couponRecord.length === 0) {
+        return res.status(404).json({ error: 'كوبون غير صحيح أو منتهي الصلاحية' });
+      }
+
+      res.json({ success: true, discountPercent: couponRecord[0].discountPercent });
+    } catch (error) {
+      console.error('Failed to validate coupon:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   // Create Stripe Checkout Session
   app.post('/api/create-checkout-session', requireAuth, async (req: AuthRequest, res) => {
     try {
       const user = req.user!;
-      const { productId, productTitle, price, currency = 'egp', displayPrice } = req.body;
+      const { productId, productTitle, price, currency = 'egp', displayPrice, couponCode } = req.body;
       
       if (!productId || !productTitle || !price) {
         return res.status(400).json({ error: 'Missing product details' });
@@ -78,10 +98,24 @@ async function startServer() {
 
       const isEgp = currency.toLowerCase() === 'egp';
       const selectedCurrency = isEgp ? 'egp' : 'usd';
-      // If EGP, charge Egyptian pound amount (in piasters * 100), otherwise USD (in cents * 100)
-      const chargeAmount = isEgp && displayPrice 
+      
+      // Calculate base charge amount
+      let chargeAmount = isEgp && displayPrice 
         ? Math.round(displayPrice * 100) 
         : Math.round(canonicalPrice * 100);
+
+      // Apply coupon if provided
+      let appliedDiscountPercent = 0;
+      if (couponCode) {
+        const couponRecord = await db.select().from(coupons).where(and(eq(coupons.code, couponCode.toUpperCase()), eq(coupons.isActive, 1))).limit(1);
+        if (couponRecord.length > 0) {
+          appliedDiscountPercent = couponRecord[0].discountPercent;
+          chargeAmount = Math.round(chargeAmount * (1 - appliedDiscountPercent / 100));
+          
+          // Increment usage count for the coupon
+          await db.update(coupons).set({ usageCount: couponRecord[0].usageCount + 1 }).where(eq(coupons.id, couponRecord[0].id));
+        }
+      }
 
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],

@@ -29,3 +29,12 @@ export const reviews = pgTable('reviews', {
   comment: text('comment').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
+
+export const coupons = pgTable('coupons', {
+  id: serial('id').primaryKey(),
+  code: text('code').notNull().unique(),
+  discountPercent: integer('discount_percent').notNull(),
+  isActive: integer('is_active').default(1).notNull(), // SQLite/PG cross compatible boolean (1=true, 0=false)
+  usageCount: integer('usage_count').default(0).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});

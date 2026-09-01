@@ -22,15 +22,44 @@ export function CheckoutModal({ product, onClose, onOrderCreated }: CheckoutModa
   const [receiptUploaded, setReceiptUploaded] = useState(false);
   const [copiedNumber, setCopiedNumber] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
+  
+  // Coupon State
+  const [couponCode, setCouponCode] = useState('');
+  const [discountPercent, setDiscountPercent] = useState(0);
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+  const [couponError, setCouponError] = useState('');
+
   const { formatPrice, getAmount, currency } = useCurrency();
 
   const isEgp = currency === 'EGP';
   const baseEgpPrice = getAmount(product.price);
   const deploymentFeeEgp = DEPLOYMENT_FEE_EGP;
   const deploymentFeeUsd = DEPLOYMENT_FEE_USD;
-  const totalEgpPrice = baseEgpPrice + (includeDeployment ? deploymentFeeEgp : 0);
-  const totalUsdPrice = product.price + (includeDeployment ? deploymentFeeUsd : 0);
+  
+  const discountMultiplier = 1 - (discountPercent / 100);
+  const totalEgpPrice = Math.round((baseEgpPrice + (includeDeployment ? deploymentFeeEgp : 0)) * discountMultiplier);
+  const totalUsdPrice = (product.price + (includeDeployment ? deploymentFeeUsd : 0)) * discountMultiplier;
+  
   const transferNumber = SUPPORT_PHONE;
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setIsApplyingCoupon(true);
+    setCouponError('');
+    try {
+      const res = await fetch(`/api/coupons/validate?code=${encodeURIComponent(couponCode.trim())}`);
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setDiscountPercent(data.discountPercent);
+      } else {
+        setCouponError(data.error || 'كوبون غير صحيح');
+        setDiscountPercent(0);
+      }
+    } catch (err) {
+      setCouponError('حدث خطأ أثناء التحقق من الكوبون');
+    }
+    setIsApplyingCoupon(false);
+  };
 
   const handleCopyNumber = () => {
     navigator.clipboard.writeText(transferNumber);
@@ -157,12 +186,16 @@ export function CheckoutModal({ product, onClose, onOrderCreated }: CheckoutModa
             <div className="bg-gradient-to-br from-indigo-900 to-slate-900 text-white p-5 rounded-2xl mb-5 shadow-md relative overflow-hidden">
               <div className="flex items-center justify-between gap-2 mb-3">
                 <span className="text-xs text-indigo-200 font-medium">المبلغ المطلوب تحويله:</span>
-                <span className="text-2xl font-black text-amber-300 font-mono">
-                  {totalEgpPrice} ج.م
-                  <span className="text-xs text-gray-300 font-normal mr-1.5">
-                    ({isEgp ? `${totalEgpPrice} ج.م` : `$${totalUsdPrice}`})
+                <div className="flex flex-col items-end">
+                  {discountPercent > 0 && (
+                    <span className="text-xs text-gray-400 line-through mb-0.5">
+                      {isEgp ? `${baseEgpPrice + (includeDeployment ? deploymentFeeEgp : 0)} ج.م` : `$${product.price + (includeDeployment ? deploymentFeeUsd : 0)}`}
+                    </span>
+                  )}
+                  <span className="text-2xl font-black text-amber-300 font-mono">
+                    {isEgp ? `${totalEgpPrice} ج.م` : `$${totalUsdPrice}`}
                   </span>
-                </span>
+                </div>
               </div>
 
               <div className="bg-white/10 backdrop-blur-md rounded-xl p-3.5 border border-white/20 mb-3">
@@ -227,6 +260,50 @@ export function CheckoutModal({ product, onClose, onOrderCreated }: CheckoutModa
                   </p>
                 </div>
               </label>
+            </div>
+
+            {/* 🎟️ Coupon Code */}
+            <div className="mb-5 bg-white p-4 rounded-2xl border border-gray-200">
+              <label className="block text-xs font-bold text-gray-700 mb-2">
+                هل لديك كود خصم؟
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                  placeholder="أدخل كود الخصم (مثال: DISCOUNT20)"
+                  className="flex-1 text-sm bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-900 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 uppercase"
+                  disabled={discountPercent > 0 || isApplyingCoupon}
+                />
+                {discountPercent > 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCouponCode('');
+                      setDiscountPercent(0);
+                    }}
+                    className="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-red-100 transition-colors"
+                  >
+                    إلغاء
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleApplyCoupon}
+                    disabled={!couponCode.trim() || isApplyingCoupon}
+                    className="bg-gray-900 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-800 disabled:opacity-50 transition-colors"
+                  >
+                    {isApplyingCoupon ? 'جاري التحقق...' : 'تطبيق'}
+                  </button>
+                )}
+              </div>
+              {couponError && <p className="text-[10px] text-red-500 mt-1 font-bold">{couponError}</p>}
+              {discountPercent > 0 && (
+                <p className="text-[10px] text-emerald-600 mt-1 font-bold">
+                  تم تطبيق خصم {discountPercent}% بنجاح!
+                </p>
+              )}
             </div>
 
             {/* Form to submit buyer details */}

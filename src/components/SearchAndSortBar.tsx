@@ -1,7 +1,7 @@
 import React from 'react';
 import { Search, X, SlidersHorizontal, ArrowUpDown, Sparkles } from 'lucide-react';
 
-export type SortOption = 'default' | 'sales' | 'rating' | 'price_low' | 'price_high';
+export type SortOption = 'default' | 'newest' | 'oldest' | 'sales' | 'rating' | 'price_low' | 'price_high';
 
 interface SearchAndSortBarProps {
   searchQuery: string;
@@ -59,6 +59,8 @@ export function SearchAndSortBar({
             className="bg-transparent text-gray-800 font-bold focus:outline-none cursor-pointer pr-1 text-xs"
           >
             <option value="default">الترتيب الافتراضي</option>
+            <option value="newest">الأحدث إضافة 🆕</option>
+            <option value="oldest">الأقدم 🕰️</option>
             <option value="sales">الأعلى مبيعاً 🔥</option>
             <option value="rating">الأعلى تقييماً ⭐</option>
             <option value="price_low">الأقل سعراً (من الأرخص) 💵</option>

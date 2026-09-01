@@ -255,7 +255,12 @@ function MainApp() {
     }
 
     // Sorting logic
-    if (sortBy === 'sales') {
+    if (sortBy === 'newest') {
+      // Assuming array is newest-first by default since new products are unshifted
+      // If not, we could rely on ID or just default order
+    } else if (sortBy === 'oldest') {
+      result.reverse();
+    } else if (sortBy === 'sales') {
       result.sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0));
     } else if (sortBy === 'rating') {
       result.sort((a, b) => (b.rating || 5.0) - (a.rating || 5.0));

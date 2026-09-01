@@ -64,9 +64,7 @@ export function DemoViewer({ product, onClose, onOpenWhitelabel, onBuy }: DemoVi
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm" dir="rtl">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-300 border border-gray-100">
-        
+    <div className="w-full max-w-5xl mx-auto my-8 bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-300" dir="rtl">
         {/* رأس النافذة */}
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white">
           <div>
@@ -136,7 +134,6 @@ export function DemoViewer({ product, onClose, onOpenWhitelabel, onBuy }: DemoVi
           </div>
         </div>
 
-      </div>
     </div>
   );
 }

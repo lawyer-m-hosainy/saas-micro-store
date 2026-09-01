@@ -5,7 +5,7 @@ import { LandingPage } from './components/LandingPage';
 import { ProductCard } from './components/ProductCard';
 import { CheckoutModal } from './components/CheckoutModal';
 import { CategoryFilter } from './components/CategoryFilter';
-import { DemoViewer } from './components/DemoViewer';
+
 import { UserLibrary } from './components/UserLibrary';
 import { LocalSellers } from './components/LocalSellers';
 import { AdminDashboard } from './components/AdminDashboard';
@@ -22,6 +22,8 @@ import { Product, Order } from './types';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { auth, googleProvider } from './lib/firebase';
 import { signInWithPopup, signOut, onAuthStateChanged, User } from 'firebase/auth';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { ProductPage } from './pages/ProductPage';
 
 export default function App() {
   return (
@@ -32,8 +34,10 @@ export default function App() {
 }
 
 function MainApp() {
-  // Navigation & Auth state - default to 'landing' for an external landing page experience
-  const [currentView, setCurrentView] = useState<'landing' | 'home' | 'library' | 'local-sellers' | 'admin' | 'tracking'>('landing');
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Navigation & Auth state
   const [user, setUser] = useState<User | null>(null);
   const [isAdvertiseOpen, setIsAdvertiseOpen] = useState(false);
   const [isTermsOpen, setIsTermsOpen] = useState(false);
@@ -109,7 +113,6 @@ function MainApp() {
 
   // Tools/Products state
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [demoProduct, setDemoProduct] = useState<Product | null>(null);
   const [whitelabelProduct, setWhitelabelProduct] = useState<Product | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   
@@ -149,7 +152,7 @@ function MainApp() {
             });
 
             if (verifyRes.ok) {
-              setCurrentView('library');
+              navigate('/library');
               // Clear URL params
               window.history.replaceState({}, document.title, window.location.pathname);
             }
@@ -174,12 +177,12 @@ function MainApp() {
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [navigate]);
 
   const handleLogin = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-      setCurrentView('home');
+      navigate('/store');
     } catch (error) {
       console.error("Login failed:", error);
     }
@@ -188,7 +191,7 @@ function MainApp() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      setCurrentView('landing');
+      navigate('/');
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -197,10 +200,26 @@ function MainApp() {
   const handleNavigate = (view: 'landing' | 'home' | 'library' | 'local-sellers' | 'admin' | 'tracking') => {
     if ((view === 'library' || view === 'local-sellers') && !isLoggedIn) {
       handleLogin();
-    } else {
-      setCurrentView(view);
+      return;
+    }
+    
+    switch (view) {
+      case 'landing': navigate('/'); break;
+      case 'home': navigate('/store'); break;
+      case 'library': navigate('/library'); break;
+      case 'local-sellers': navigate('/local-sellers'); break;
+      case 'admin': navigate('/admin'); break;
+      case 'tracking': navigate('/tracking'); break;
+      default: navigate('/'); break;
     }
   };
+
+  const currentView = location.pathname === '/' ? 'landing' :
+                      location.pathname === '/store' ? 'home' :
+                      location.pathname === '/library' ? 'library' :
+                      location.pathname === '/local-sellers' ? 'local-sellers' :
+                      location.pathname === '/admin' ? 'admin' :
+                      location.pathname === '/tracking' ? 'tracking' : 'home';
 
   const handleAddProduct = (newProduct: Product) => {
     setProductsList(prev => {
@@ -293,161 +312,176 @@ function MainApp() {
       />
       
       <main className="flex-grow flex flex-col">
-        {currentView === 'landing' ? (
-          /* 🌟 Standalone High-Converting Landing Page */
-          <LandingPage
-            products={productsList}
-            onEnterStore={() => setCurrentView('home')}
-            onLogin={handleLogin}
-            onOpenRadar={() => handleNavigate('local-sellers')}
-            onBuyProduct={setSelectedProduct}
-            onDemoProduct={setDemoProduct}
-            onWhitelabelProduct={setWhitelabelProduct}
-            onOpenAdvertise={() => setIsAdvertiseOpen(true)}
-            isLoggedIn={isLoggedIn}
-            userName={user?.displayName || user?.email?.split('@')[0]}
-          />
-        ) : currentView === 'home' ? (
-          /* 🛒 Main Store Catalog View */
-          <>
-            <Hero 
-              onExploreClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
-              onOpenRadar={() => handleNavigate('local-sellers')}
+        <Routes>
+          <Route path="/" element={
+              <LandingPage
+                products={productsList}
+                onEnterStore={() => navigate('/store')}
+                onLogin={handleLogin}
+                onOpenRadar={() => handleNavigate('local-sellers')}
+                onBuyProduct={setSelectedProduct}
+                onDemoProduct={(p) => navigate(`/product/${p.id}`)}
+                onWhitelabelProduct={setWhitelabelProduct}
+                onOpenAdvertise={() => setIsAdvertiseOpen(true)}
+                isLoggedIn={isLoggedIn}
+                userName={user?.displayName || user?.email?.split('@')[0]}
+              />
+          } />
+          
+          <Route path="/product/:id" element={
+            <ProductPage 
+              productsList={productsList} 
+              onOrderCreated={handleOrderCreated}
             />
-            
-            <section id="products" className="py-16 bg-gray-50 scroll-mt-16">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="mb-10 text-center">
-                  <h2 className="text-3xl font-black text-gray-950 mb-3">
-                    كتالوج أدوات المايكرو ساس 
-                    <span className="text-indigo-600 text-sm mx-2 bg-indigo-50 px-3 py-1 rounded-full font-bold border border-indigo-100">
-                      ({productsList.length} أداة جاهزة)
-                    </span>
-                  </h2>
-                  <p className="text-gray-600 text-sm max-w-2xl mx-auto mb-8">
-                    تصفح جميع الأدوات، جربها حياً، واحصل على الكود المصدري كاملاً فوراً بدون اشتراكات شهرية.
-                  </p>
-                  
-                  <CategoryFilter 
-                    categories={categories} 
-                    activeCategoryId={activeCategory} 
-                    onSelectCategory={setActiveCategory} 
-                  />
-                </div>
+          } />
+          
+          <Route path="/store" element={
+            <>
+              <Hero 
+                onExploreClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
+                onOpenRadar={() => handleNavigate('local-sellers')}
+              />
+              
+              <section id="products" className="py-16 bg-gray-50 scroll-mt-16">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <div className="mb-10 text-center">
+                    <h2 className="text-3xl font-black text-gray-950 mb-3">
+                      كتالوج أدوات المايكرو ساس 
+                      <span className="text-indigo-600 text-sm mx-2 bg-indigo-50 px-3 py-1 rounded-full font-bold border border-indigo-100">
+                        ({productsList.length} أداة جاهزة)
+                      </span>
+                    </h2>
+                    <p className="text-gray-600 text-sm max-w-2xl mx-auto mb-8">
+                      تصفح جميع الأدوات، جربها حياً، واحصل على الكود المصدري كاملاً فوراً بدون اشتراكات شهرية.
+                    </p>
+                    
+                    <CategoryFilter 
+                      categories={categories} 
+                      activeCategoryId={activeCategory} 
+                      onSelectCategory={setActiveCategory} 
+                    />
+                  </div>
 
-                {/* 🔍 Search and Sorting Bar */}
-                <SearchAndSortBar
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                  sortBy={sortBy}
-                  onSortChange={setSortBy}
-                  totalResults={filteredProducts.length}
-                />
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-                  {currentProducts.map((product, idx) => (
-                    <React.Fragment key={product.id}>
-                      <ProductCard 
-                        product={product} 
-                        onBuy={setSelectedProduct} 
-                        onDemo={setDemoProduct}
-                        onWhitelabel={setWhitelabelProduct}
-                      />
-                      {/* Place sponsored ad card seamlessly at position 3 */}
-                      {idx === 2 && (
-                        <SponsoredProductCard onOpenAdvertise={() => setIsAdvertiseOpen(true)} />
-                      )}
-                    </React.Fragment>
-                  ))}
-                  {currentProducts.length > 0 && currentProducts.length < 3 && (
-                    <SponsoredProductCard onOpenAdvertise={() => setIsAdvertiseOpen(true)} />
+                  {/* 🔍 Search and Sorting Bar */}
+                  <SearchAndSortBar
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    sortBy={sortBy}
+                    onSortChange={setSortBy}
+                    totalResults={filteredProducts.length}
+                  />
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                    {currentProducts.map((product, idx) => (
+                      <React.Fragment key={product.id}>
+                        <ProductCard 
+                          product={product} 
+                          onBuy={setSelectedProduct} 
+                          onDemo={(p) => navigate(`/product/${p.id}`)}
+                          onWhitelabel={setWhitelabelProduct}
+                        />
+                        {/* Place sponsored ad card seamlessly at position 3 */}
+                        {idx === 2 && (
+                          <SponsoredProductCard onOpenAdvertise={() => setIsAdvertiseOpen(true)} />
+                        )}
+                      </React.Fragment>
+                    ))}
+                    {currentProducts.length > 0 && currentProducts.length < 3 && (
+                      <SponsoredProductCard onOpenAdvertise={() => setIsAdvertiseOpen(true)} />
+                    )}
+                  </div>
+                  
+                  {/* Mid-Feed Banner */}
+                  <MidFeedAdBanner onOpenAdvertise={() => setIsAdvertiseOpen(true)} />
+
+                  {totalPages > 1 && (
+                    <div className="flex justify-center items-center gap-2 mt-8">
+                      <button 
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className="p-2 rounded-xl border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ChevronRight size={20} />
+                      </button>
+                      
+                      <div className="flex gap-1 overflow-x-auto max-w-[200px] sm:max-w-none scrollbar-hide px-2">
+                        {Array.from({ length: totalPages }).map((_, index) => {
+                          const pageNum = index + 1;
+                          const isNear = Math.abs(pageNum - currentPage) <= 2;
+                          const isEdge = pageNum === 1 || pageNum === totalPages;
+                          
+                          if (!isNear && !isEdge) {
+                            if (pageNum === 2 || pageNum === totalPages - 1) {
+                              return <span key={pageNum} className="px-2 text-gray-400">...</span>;
+                            }
+                            return null;
+                          }
+
+                          return (
+                            <button
+                              key={pageNum}
+                              onClick={() => handlePageChange(pageNum)}
+                              className={`w-10 h-10 rounded-xl text-sm font-bold transition-colors shrink-0 ${
+                                currentPage === pageNum
+                                  ? 'bg-indigo-600 text-white shadow-xs'
+                                  : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <button 
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className="p-2 rounded-xl border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ChevronLeft size={20} />
+                      </button>
+                    </div>
+                  )}
+                  
+                  {filteredProducts.length === 0 && (
+                    <div className="text-center py-20 text-gray-500 bg-white rounded-3xl border border-gray-200">
+                      <p className="text-base font-bold text-gray-800 mb-1">لم نتمكن من العثور على أداة مطابقة لبحثك</p>
+                      <p className="text-xs text-gray-500">جرب كتابة كلمة أخرى أو تصفية تصنيف مختلف.</p>
+                    </div>
                   )}
                 </div>
-                
-                {/* Mid-Feed Banner */}
-                <MidFeedAdBanner onOpenAdvertise={() => setIsAdvertiseOpen(true)} />
-
-                {totalPages > 1 && (
-                  <div className="flex justify-center items-center gap-2 mt-8">
-                    <button 
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className="p-2 rounded-xl border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <ChevronRight size={20} />
-                    </button>
-                    
-                    <div className="flex gap-1 overflow-x-auto max-w-[200px] sm:max-w-none scrollbar-hide px-2">
-                      {Array.from({ length: totalPages }).map((_, index) => {
-                        const pageNum = index + 1;
-                        const isNear = Math.abs(pageNum - currentPage) <= 2;
-                        const isEdge = pageNum === 1 || pageNum === totalPages;
-                        
-                        if (!isNear && !isEdge) {
-                          if (pageNum === 2 || pageNum === totalPages - 1) {
-                            return <span key={pageNum} className="px-2 text-gray-400">...</span>;
-                          }
-                          return null;
-                        }
-
-                        return (
-                          <button
-                            key={pageNum}
-                            onClick={() => handlePageChange(pageNum)}
-                            className={`w-10 h-10 rounded-xl text-sm font-bold transition-colors shrink-0 ${
-                              currentPage === pageNum
-                                ? 'bg-indigo-600 text-white shadow-xs'
-                                : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
-                            }`}
-                          >
-                            {pageNum}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <button 
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                      className="p-2 rounded-xl border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <ChevronLeft size={20} />
-                    </button>
-                  </div>
-                )}
-                
-                {filteredProducts.length === 0 && (
-                  <div className="text-center py-20 text-gray-500 bg-white rounded-3xl border border-gray-200">
-                    <p className="text-base font-bold text-gray-800 mb-1">لم نتمكن من العثور على أداة مطابقة لبحثك</p>
-                    <p className="text-xs text-gray-500">جرب كتابة كلمة أخرى أو تصفية تصنيف مختلف.</p>
-                  </div>
-                )}
-              </div>
-            </section>
-          </>
-        ) : currentView === 'library' ? (
-          <UserLibrary 
-            purchasedProducts={purchasedProducts} 
-            onOpenTool={setDemoProduct}
-            userName={user?.displayName || user?.email?.split('@')[0] || 'عميلنا العزيز'}
-          />
-        ) : currentView === 'local-sellers' ? (
-          <LocalSellers />
-        ) : currentView === 'tracking' ? (
-          <OrderTracking 
-            orders={orders}
-            products={productsList}
-            onOpenTool={setDemoProduct}
-          />
-        ) : (
-          <AdminDashboard
-            products={productsList}
-            orders={orders}
-            onAddProduct={handleAddProduct}
-            onDeleteProduct={handleDeleteProduct}
-            onUpdateOrderStatus={handleUpdateOrderStatus}
-          />
-        )}
+              </section>
+            </>
+          } />
+          
+          <Route path="/library" element={
+            <UserLibrary 
+              purchasedProducts={purchasedProducts} 
+              onOpenTool={(p) => navigate(`/product/${p.id}`)}
+              userName={user?.displayName || user?.email?.split('@')[0] || 'عميلنا العزيز'}
+            />
+          } />
+          
+          <Route path="/local-sellers" element={<LocalSellers />} />
+          
+          <Route path="/tracking" element={
+            <OrderTracking 
+              orders={orders}
+              products={productsList}
+              onOpenTool={(p) => navigate(`/product/${p.id}`)}
+            />
+          } />
+          
+          <Route path="/admin" element={
+            <AdminDashboard
+              products={productsList}
+              orders={orders}
+              onAddProduct={handleAddProduct}
+              onDeleteProduct={handleDeleteProduct}
+              onUpdateOrderStatus={handleUpdateOrderStatus}
+            />
+          } />
+        </Routes>
       </main>
 
       {/* 💬 Floating WhatsApp & Quick Support Widget */}
@@ -490,21 +524,7 @@ function MainApp() {
         />
       )}
 
-      {/* 👁️ Live Demo Modal */}
-      {demoProduct && (
-        <DemoViewer 
-          product={demoProduct} 
-          onClose={() => setDemoProduct(null)}
-          onOpenWhitelabel={(p) => {
-            setDemoProduct(null);
-            setWhitelabelProduct(p);
-          }}
-          onBuy={(p) => {
-            setDemoProduct(null);
-            setSelectedProduct(p);
-          }}
-        />
-      )}
+
 
       {/* 🎛️ White-Label Branding Simulator Modal */}
       {whitelabelProduct && (

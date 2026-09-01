@@ -111,14 +111,14 @@ async function startServer() {
 - يحصل العميل على ترخيص تجاري مدى الحياة.
 - التسليم يتم خلال 24 ساعة من الشراء.
 - يوجد خدمة تركيب سحابي مقابل 20 دولار أو ما يعادله.
-- الدفع متاح عبر Stripe أو Instapay/Vodafone Cash في مصر.
+- طرق الدفع: إنستاباي، فودافون كاش، المحافظ الإلكترونية. (لا نستخدم Stripe أو بوابات الدفع).
 
 سؤال العميل: "${message}"
 
 أجب باختصار وبشكل مباشر:`;
 
       const response = await genAI.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.6-flash',
         contents: prompt
       });
 

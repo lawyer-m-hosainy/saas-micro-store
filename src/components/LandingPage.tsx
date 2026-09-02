@@ -129,7 +129,7 @@ export function LandingPage({
 
             {/* Subtitle */}
             <p className="text-base sm:text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto mb-8">
-              لا تدفع آلاف الجنيهات في اشتراكات البرامج الشهرية. تصفح أكثر من <strong className="text-gray-950 font-bold">500 أداة Micro SaaS</strong> جاهزة، جربها حياً، واحصل على الكود المصدري الكامل (.ZIP) لتبدأ مشروعك أو تعيد بيعها لعملائك.
+              لا تدفع آلاف الجنيهات في اشتراكات البرامج الشهرية. تصفح أكثر من <strong className="text-gray-950 font-bold">100 أداة Micro SaaS</strong> جاهزة، جربها حياً، واحصل على الكود المصدري الكامل (.ZIP) لتبدأ مشروعك أو تعيد بيعها لعملائك.
             </p>
 
             {/* Quick Action Buttons (Login & Enter) */}
@@ -163,7 +163,7 @@ export function LandingPage({
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto text-right">
               
               <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs">
-                <div className="text-2xl sm:text-3xl font-black text-indigo-600 mb-1">500+</div>
+                <div className="text-2xl sm:text-3xl font-black text-indigo-600 mb-1">100+</div>
                 <div className="text-xs font-bold text-gray-800">أداة SaaS مبرمجة</div>
                 <div className="text-[11px] text-gray-500">جاهزة للتشغيل الفوري</div>
               </div>
@@ -219,7 +219,7 @@ export function LandingPage({
               onClick={onEnterStore}
               className="bg-gray-950 hover:bg-gray-800 text-white font-bold px-6 py-3 rounded-2xl text-xs sm:text-sm flex items-center gap-2 self-start md:self-auto transition-all shadow-xs"
             >
-              <span>عرض جميع المنتجات الـ 500</span>
+              <span>عرض جميع المنتجات الـ 100</span>
               <ArrowLeft size={16} />
             </button>
           </div>

@@ -33,7 +33,7 @@ export function LandingPage({
   isLoggedIn,
   userName
 }: LandingPageProps) {
-  const { currency, setCurrency, formatPrice } = useCurrency();
+  const { formatPrice } = useCurrency();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const toggleFaq = (idx: number) => {
@@ -81,33 +81,6 @@ export function LandingPage({
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
               </span>
               <span>المنصة الأولى لأدوات المايكرو ساس الجاهزة في مصر والوطن العربي</span>
-            </div>
-
-            {/* Currency Switcher */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500 font-bold">العملة:</span>
-              <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200 text-xs font-bold">
-                <button
-                  onClick={() => setCurrency('EGP')}
-                  className={`px-3 py-1 rounded-lg transition-all ${
-                    currency === 'EGP' 
-                      ? 'bg-emerald-600 text-white shadow-xs' 
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  🇪🇬 الجنيه المصري (ج.م)
-                </button>
-                <button
-                  onClick={() => setCurrency('USD')}
-                  className={`px-3 py-1 rounded-lg transition-all ${
-                    currency === 'USD' 
-                      ? 'bg-indigo-600 text-white shadow-xs' 
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  💵 الدولار ($ USD)
-                </button>
-              </div>
             </div>
           </div>
 
@@ -204,7 +177,7 @@ export function LandingPage({
                   معاينة حية للمنتجات
                 </span>
                 <span className="text-xs text-gray-500 font-bold">
-                  (التسعير الحالي: {currency === 'EGP' ? 'بالجنيه المصري 🇪🇬' : 'بالدولار 💵'})
+                  (التسعير بالجنيه المصري 🇪🇬)
                 </span>
               </div>
               <h2 className="text-3xl font-black text-gray-950">
@@ -345,10 +318,10 @@ export function LandingPage({
               <div className="grid grid-cols-3 p-4 items-center bg-white">
                 <div className="font-bold text-gray-900">التكلفة السنوية</div>
                 <div className="text-center text-emerald-700 font-bold bg-emerald-50 py-1.5 rounded-xl">
-                  {currency === 'EGP' ? '299 - 799 ج.م (ثابت للأبد)' : '$29 - $79 (مرة واحدة)'}
+                  299 - 799 ج.م (ثابت للأبد)
                 </div>
                 <div className="text-center text-red-500 font-medium">
-                  {currency === 'EGP' ? '+15,000 ج.م سنوياً ($30/شهر)' : '+$360 سنوياً'}
+                  +15,000 ج.م سنوياً
                 </div>
               </div>
 

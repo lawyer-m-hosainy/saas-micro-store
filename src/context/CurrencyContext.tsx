@@ -1,52 +1,38 @@
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useCallback, useMemo } from 'react';
 import { EGP_RATE, MIN_EGP_PRICE } from '../config/constants';
 
-export type Currency = 'EGP' | 'USD';
+// المتجر بيعتمد على الجنيه المصري فقط — العملة مش قابلة للتغيير من المستخدم.
+export type Currency = 'EGP';
 
 interface CurrencyContextType {
   currency: Currency;
-  setCurrency: (c: Currency) => void;
   formatPrice: (priceUsd: number, customEgp?: number) => string;
   getAmount: (priceUsd: number, customEgp?: number) => number;
 }
 
+function computeEgpAmount(priceUsd: number, customEgp?: number): number {
+  if (priceUsd === 0) return 0;
+  if (customEgp) return customEgp;
+  const calculated = Math.round((priceUsd * EGP_RATE) / 50) * 50 - 1;
+  return Math.max(calculated, MIN_EGP_PRICE);
+}
+
 const CurrencyContext = createContext<CurrencyContextType>({
   currency: 'EGP',
-  setCurrency: () => {},
-  formatPrice: (p) => `${p} ج.م`,
-  getAmount: (p) => p,
+  formatPrice: (p, c) => `${computeEgpAmount(p, c).toLocaleString('ar-EG')} ج.م`,
+  getAmount: computeEgpAmount,
 });
 
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
-  const [currency, setCurrencyState] = useState<Currency>(() => {
-    const stored = localStorage.getItem('preferred_currency');
-    return (stored === 'USD' || stored === 'EGP') ? stored : 'EGP';
-  });
-
-  const setCurrency = useCallback((c: Currency) => {
-    setCurrencyState(c);
-    try { localStorage.setItem('preferred_currency', c); } catch {}
+  const getAmount = useCallback((priceUsd: number, customEgp?: number): number => {
+    return computeEgpAmount(priceUsd, customEgp);
   }, []);
 
-  const getAmount = useCallback((priceUsd: number, customEgp?: number): number => {
-    if (priceUsd === 0) return 0;
-    if (currency === 'EGP') {
-      if (customEgp) return customEgp;
-      const calculated = Math.round((priceUsd * EGP_RATE) / 50) * 50 - 1;
-      return Math.max(calculated, MIN_EGP_PRICE);
-    }
-    return priceUsd;
-  }, [currency]);
-
   const formatPrice = useCallback((priceUsd: number, customEgp?: number): string => {
-    const amount = getAmount(priceUsd, customEgp);
-    if (currency === 'EGP') {
-      return `${amount.toLocaleString('ar-EG')} ج.م`;
-    }
-    return `$${amount.toLocaleString('en-US')}`;
-  }, [currency, getAmount]);
+    return `${getAmount(priceUsd, customEgp).toLocaleString('ar-EG')} ج.م`;
+  }, [getAmount]);
 
-  const value = useMemo(() => ({ currency, setCurrency, formatPrice, getAmount }), [currency, setCurrency, formatPrice, getAmount]);
+  const value = useMemo(() => ({ currency: 'EGP' as const, formatPrice, getAmount }), [formatPrice, getAmount]);
 
   return (
     <CurrencyContext.Provider value={value}>

@@ -11,6 +11,7 @@ import { eq, and, or, ilike, desc } from 'drizzle-orm';
 import { GoogleGenAI } from '@google/genai';
 import { products as catalogProducts } from './src/data.js';
 import { notifyNewOrder } from './src/server/notifications';
+import { fulfillCompletedOrder } from './src/server/fulfillment';
 
 const genAI = process.env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY, httpOptions: { headers: { 'User-Agent': 'aistudio-build' } } }) : null;
 
@@ -19,7 +20,7 @@ async function startServer() {
   const PORT = Number(process.env.PORT) || 3000;
 
   app.use(cors({ origin: process.env.APP_URL || '*', credentials: true }));
-  app.use(express.json());
+  app.use(express.json({ limit: '6mb' })); // receipt images travel as base64 in the order payload
 
   // API Routes
   
@@ -104,18 +105,24 @@ async function startServer() {
 
   const ORDER_STATUSES = ['pending', 'processing', 'completed', 'cancelled'];
 
+  const MAX_RECEIPT_IMAGE_LENGTH = 4 * 1024 * 1024; // ~3MB image as base64 text
+
   // Create a new order (called from checkout — no login required, matches the store's buy flow)
   app.post('/api/orders', async (req, res) => {
     try {
-      const { productId, productTitle, buyerName, buyerEmail, buyerPhone, senderAccount, amountEgp, amountUsd } = req.body;
+      const { productId, productTitle, buyerName, buyerEmail, buyerPhone, senderAccount, amountEgp, receiptImage } = req.body;
 
       if (!productId || !productTitle || !buyerName || !buyerEmail || !buyerPhone || !senderAccount) {
         return res.status(400).json({ error: 'Missing required order fields' });
       }
       const parsedAmountEgp = Number(amountEgp);
-      const parsedAmountUsd = Number(amountUsd);
-      if (!Number.isFinite(parsedAmountEgp) || parsedAmountEgp <= 0 || !Number.isFinite(parsedAmountUsd) || parsedAmountUsd <= 0) {
+      if (!Number.isFinite(parsedAmountEgp) || parsedAmountEgp <= 0) {
         return res.status(400).json({ error: 'Invalid order amount' });
+      }
+      if (receiptImage !== undefined) {
+        if (typeof receiptImage !== 'string' || !receiptImage.startsWith('data:image/') || receiptImage.length > MAX_RECEIPT_IMAGE_LENGTH) {
+          return res.status(400).json({ error: 'Invalid receipt image' });
+        }
       }
 
       const orderId = `#ORD-${Math.floor(100000 + Math.random() * 900000)}`;
@@ -128,7 +135,7 @@ async function startServer() {
         buyerPhone,
         senderAccount,
         amountEgp: Math.round(parsedAmountEgp),
-        amountUsd: Math.round(parsedAmountUsd * 100) / 100,
+        receiptImage: receiptImage || null,
         status: 'pending',
       }).returning();
 
@@ -179,8 +186,16 @@ async function startServer() {
         return res.status(400).json({ error: 'Invalid status' });
       }
 
+      const [existingOrder] = await db.select().from(orders).where(eq(orders.id, id)).limit(1);
+      if (!existingOrder) return res.status(404).json({ error: 'Order not found' });
+
       const [updated] = await db.update(orders).set({ status }).where(eq(orders.id, id)).returning();
-      if (!updated) return res.status(404).json({ error: 'Order not found' });
+
+      // فقط عند أول انتقال فعلي لحالة "مكتمل" — عشان نضمن الإيميل ما يترسلش تاني كل مرة الأدمن يضغط تأكيد
+      if (status === 'completed' && existingOrder.status !== 'completed') {
+        fulfillCompletedOrder(updated).catch((err) => console.error('Order fulfillment failed:', err));
+      }
+
       res.json(updated);
     } catch (error) {
       console.error('Failed to update order status:', error);

@@ -28,9 +28,9 @@ export interface Order {
   buyerPhone: string;
   senderAccount: string;
   amountEgp: number;
-  amountUsd: number;
   createdAt: string;
   status: OrderStatus;
   licenseKey?: string;
+  receiptImage?: string | null;
 }
 

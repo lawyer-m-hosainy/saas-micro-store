@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, integer, doublePrecision } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, timestamp, integer } from "drizzle-orm/pg-core";
 
 // Needs index creation via migration:
 // CREATE INDEX IF NOT EXISTS user_id_idx ON purchases (user_id);
@@ -47,7 +47,7 @@ export const orders = pgTable('orders', {
   buyerPhone: text('buyer_phone').notNull(),
   senderAccount: text('sender_account').notNull(),
   amountEgp: integer('amount_egp').notNull(),
-  amountUsd: doublePrecision('amount_usd').notNull(),
   status: text('status').notNull().default('pending'), // pending | processing | completed | cancelled
+  receiptImage: text('receipt_image'), // base64 data URI of the buyer's transfer receipt screenshot, optional
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });

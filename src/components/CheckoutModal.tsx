@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Product, Order } from '../types';
-import { X, Check, Copy, Clock, MessageCircle, CheckCircle2, Zap } from 'lucide-react';
-import { SUPPORT_PHONE, WHATSAPP_NUMBER, DEPLOYMENT_FEE_EGP, DEPLOYMENT_FEE_USD } from '../config/constants';
+import { X, Check, Copy, Clock, MessageCircle, CheckCircle2, Zap, Paperclip, ImageOff } from 'lucide-react';
+import { SUPPORT_PHONE, WHATSAPP_NUMBER, getDeploymentFeeEgp } from '../config/constants';
 import { useCurrency } from '../context/CurrencyContext';
 
 interface CheckoutModalProps {
@@ -9,6 +9,8 @@ interface CheckoutModalProps {
   onClose: () => void;
   onOrderCreated?: (newOrder: Order) => void;
 }
+
+const MAX_RECEIPT_BYTES = 3 * 1024 * 1024; // 3MB
 
 export function CheckoutModal({ product, onClose, onOrderCreated }: CheckoutModalProps) {
   const [isSuccess, setIsSuccess] = useState(false);
@@ -19,7 +21,9 @@ export function CheckoutModal({ product, onClose, onOrderCreated }: CheckoutModa
     senderAccount: '', // رقم المحفظة أو عنوان انستاباي المحول منه
   });
   const [includeDeployment, setIncludeDeployment] = useState(false);
-  const [receiptUploaded, setReceiptUploaded] = useState(false);
+  const [receiptImage, setReceiptImage] = useState<string | null>(null);
+  const [receiptFileName, setReceiptFileName] = useState('');
+  const [receiptError, setReceiptError] = useState('');
   const [copiedNumber, setCopiedNumber] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -31,18 +35,44 @@ export function CheckoutModal({ product, onClose, onOrderCreated }: CheckoutModa
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   const [couponError, setCouponError] = useState('');
 
-  const { formatPrice, getAmount, currency } = useCurrency();
+  const { getAmount } = useCurrency();
 
-  const isEgp = currency === 'EGP';
   const baseEgpPrice = getAmount(product.price);
-  const deploymentFeeEgp = DEPLOYMENT_FEE_EGP;
-  const deploymentFeeUsd = DEPLOYMENT_FEE_USD;
-  
+  const deploymentFeeEgp = getDeploymentFeeEgp(baseEgpPrice);
+
   const discountMultiplier = 1 - (discountPercent / 100);
   const totalEgpPrice = Math.round((baseEgpPrice + (includeDeployment ? deploymentFeeEgp : 0)) * discountMultiplier);
-  const totalUsdPrice = (product.price + (includeDeployment ? deploymentFeeUsd : 0)) * discountMultiplier;
-  
+
   const transferNumber = SUPPORT_PHONE;
+
+  const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    setReceiptError('');
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setReceiptError('يُسمح فقط بملفات الصور (JPG, PNG, ...)');
+      return;
+    }
+    if (file.size > MAX_RECEIPT_BYTES) {
+      setReceiptError('حجم الصورة أكبر من 3 ميجابايت، يرجى ضغطها أو اختيار صورة أصغر');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setReceiptImage(reader.result as string);
+      setReceiptFileName(file.name);
+    };
+    reader.onerror = () => setReceiptError('تعذر قراءة الصورة، حاول مرة أخرى');
+    reader.readAsDataURL(file);
+  };
+
+  const removeReceipt = () => {
+    setReceiptImage(null);
+    setReceiptFileName('');
+    setReceiptError('');
+  };
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
@@ -86,7 +116,7 @@ export function CheckoutModal({ product, onClose, onOrderCreated }: CheckoutModa
           buyerPhone: buyerData.phone,
           senderAccount: buyerData.senderAccount,
           amountEgp: totalEgpPrice,
-          amountUsd: totalUsdPrice,
+          receiptImage: receiptImage || undefined,
         }),
       });
       const data = await res.json();
@@ -105,7 +135,6 @@ export function CheckoutModal({ product, onClose, onOrderCreated }: CheckoutModa
         buyerPhone: data.buyerPhone,
         senderAccount: data.senderAccount,
         amountEgp: data.amountEgp,
-        amountUsd: data.amountUsd,
         createdAt: new Date().toLocaleDateString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
         status: data.status,
       };
@@ -218,11 +247,11 @@ export function CheckoutModal({ product, onClose, onOrderCreated }: CheckoutModa
                 <div className="flex flex-col items-end">
                   {discountPercent > 0 && (
                     <span className="text-xs text-gray-400 line-through mb-0.5">
-                      {isEgp ? `${baseEgpPrice + (includeDeployment ? deploymentFeeEgp : 0)} ج.م` : `$${product.price + (includeDeployment ? deploymentFeeUsd : 0)}`}
+                      {baseEgpPrice + (includeDeployment ? deploymentFeeEgp : 0)} ج.م
                     </span>
                   )}
                   <span className="text-2xl font-black text-amber-300 font-mono">
-                    {isEgp ? `${totalEgpPrice} ج.م` : `$${totalUsdPrice}`}
+                    {totalEgpPrice} ج.م
                   </span>
                 </div>
               </div>
@@ -281,7 +310,7 @@ export function CheckoutModal({ product, onClose, onOrderCreated }: CheckoutModa
                       إضافة خدمة التركيب والتشغيل السحابي السريع
                     </span>
                     <span className="text-xs font-black text-indigo-700 bg-indigo-100/80 px-2 py-0.5 rounded-md">
-                      +{isEgp ? `${deploymentFeeEgp} ج.م` : `$${deploymentFeeUsd}`}
+                      +{deploymentFeeEgp} ج.م
                     </span>
                   </div>
                   <p className="text-[11px] text-gray-600 mt-1 leading-relaxed">
@@ -396,18 +425,35 @@ export function CheckoutModal({ product, onClose, onOrderCreated }: CheckoutModa
                 />
               </div>
 
-              {/* Optional Receipt Attachment Checkbox */}
-              <div className="bg-gray-50 p-3 rounded-xl border border-gray-200 flex items-center justify-between text-xs">
-                <span className="text-gray-600 font-medium">هل قمت بحفظ لقطة شاشة لإيصال التحويل؟</span>
-                <button
-                  type="button"
-                  onClick={() => setReceiptUploaded(!receiptUploaded)}
-                  className={`px-3 py-1.5 rounded-lg font-bold transition-colors ${
-                    receiptUploaded ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-700'
-                  }`}
-                >
-                  {receiptUploaded ? '✓ نعم، جاهز لإرسالها بالواتساب' : 'إرفاق لاحقاً'}
-                </button>
+              {/* Receipt Attachment Upload */}
+              <div className="bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <span className="text-gray-600 font-medium">إرفاق لقطة شاشة لإيصال التحويل (اختياري، بيسرّع المطابقة)</span>
+                </div>
+
+                {receiptImage ? (
+                  <div className="flex items-center justify-between gap-2 bg-white border border-gray-200 rounded-lg p-2">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <img src={receiptImage} alt="معاينة إيصال التحويل" className="w-10 h-10 object-cover rounded-md border border-gray-200" />
+                      <span className="text-gray-700 font-bold truncate">{receiptFileName}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={removeReceipt}
+                      className="text-red-500 hover:text-red-700 p-1"
+                      aria-label="إزالة الصورة"
+                    >
+                      <ImageOff size={16} />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="flex items-center justify-center gap-1.5 border border-dashed border-gray-300 rounded-lg py-2.5 cursor-pointer text-gray-500 hover:border-indigo-400 hover:text-indigo-600 transition-colors">
+                    <Paperclip size={14} />
+                    <span>اختر صورة الإيصال (JPG/PNG، حتى 3 ميجابايت)</span>
+                    <input type="file" accept="image/*" onChange={handleReceiptChange} className="hidden" />
+                  </label>
+                )}
+                {receiptError && <p className="text-[10px] text-red-500 mt-1 font-bold">{receiptError}</p>}
               </div>
 
               {submitError && (

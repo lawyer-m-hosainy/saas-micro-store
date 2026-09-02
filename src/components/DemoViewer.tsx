@@ -12,6 +12,62 @@ import { LinkInBioDemo } from '../tools/LinkInBio';
 import { NicheContentDemo } from '../tools/NicheContent';
 import { PdfChatDemo } from '../tools/PdfChat';
 import { SeoMetaGeneratorDemo } from '../tools/SeoMetaGenerator';
+import { SaasRunwayCalculatorDemo } from '../tools/SaasRunwayCalculator';
+import { RealEstateRoiCalculatorDemo } from '../tools/RealEstateRoiCalculator';
+import { EcomTaxProfitAuditorDemo } from '../tools/EcomTaxProfitAuditor';
+import { VendorEvaluationMatrixDemo } from '../tools/VendorEvaluationMatrix';
+import { FleetFuelTrackerDemo } from '../tools/FleetFuelTracker';
+import { RecipeCostingCalculatorDemo } from '../tools/RecipeCostingCalculator';
+import { EtaEInvoiceValidatorDemo } from '../tools/EtaEInvoiceValidator';
+import { ApiKeyLeakScannerDemo } from '../tools/ApiKeyLeakScanner';
+import { TenantLeaseTrackerDemo } from '../tools/TenantLeaseTracker';
+import { WebhookPayloadTransformerDemo } from '../tools/WebhookPayloadTransformer';
+import { InstapayBankReconcilerDemo } from '../tools/InstapayBankReconciler';
+import { JsonToTypescriptZodDemo } from '../tools/JsonToTypescriptZod';
+import { GithubReadmeGeneratorDemo } from '../tools/GithubReadmeGenerator';
+import { CookieConsentBannerDemo } from '../tools/CookieConsentBanner';
+import { UtmCampaignRoiTrackerDemo } from '../tools/UtmCampaignRoiTracker';
+import { SchemaMarkupBuilderDemo } from '../tools/SchemaMarkupBuilder';
+import { BrokenLinkRedirectMapperDemo } from '../tools/BrokenLinkRedirectMapper';
+import { FreelanceHourlyRateCalculatorDemo } from '../tools/FreelanceHourlyRateCalculator';
+import { MacroCalorieMealGeneratorDemo } from '../tools/MacroCalorieMealGenerator';
+import { WarehouseBinLocatorDemo } from '../tools/WarehouseBinLocator';
+import { UnboxingReviewCardMakerDemo } from '../tools/UnboxingReviewCardMaker';
+import { SmartFileBatchRenamerDemo } from '../tools/SmartFileBatchRenamer';
+import { OnboardingChecklistBotDemo } from '../tools/OnboardingChecklistBot';
+import { RemoteTeamBurnoutPulseDemo } from '../tools/RemoteTeamBurnoutPulse';
+import { SocialBannerAutoResizerDemo } from '../tools/SocialBannerAutoResizer';
+import { VectorIconPaletteRecolorDemo } from '../tools/VectorIconPaletteRecolor';
+import { ApiMockEndpointBuilderDemo } from '../tools/ApiMockEndpointBuilder';
+import { ChurnPredictionRadarDemo } from '../tools/ChurnPredictionRadar';
+import { FineTuningDatasetCleanerDemo } from '../tools/FineTuningDatasetCleaner';
+import { QrTicketCheckinScannerDemo } from '../tools/QrTicketCheckinScanner';
+import { DynamicDrmVideoWatermarkDemo } from '../tools/DynamicDrmVideoWatermark';
+import { SoundbiteQuoteVisualizerDemo } from '../tools/SoundbiteQuoteVisualizer';
+import { PropertyBrochureBuilderDemo } from '../tools/PropertyBrochureBuilder';
+import { SymptomTriageIntakeFormDemo } from '../tools/SymptomTriageIntakeForm';
+import { DeliveryCostRouteOptimizerDemo } from '../tools/DeliveryCostRouteOptimizer';
+import { BadgeNameTagBulkPrinterDemo } from '../tools/BadgeNameTagBulkPrinter';
+import { CertificateBulkGeneratorDemo } from '../tools/CertificateBulkGenerator';
+import { CsatFeedbackSurveyWidgetDemo } from '../tools/CsatFeedbackSurveyWidget';
+import { CannedResponseSnippetManagerDemo } from '../tools/CannedResponseSnippetManager';
+import { SmartTableOrderingQrDemo } from '../tools/SmartTableOrderingQr';
+import { SpeakerAgendaBuilderDemo } from '../tools/SpeakerAgendaBuilder';
+import { WorkoutRoutineCardBuilderDemo } from '../tools/WorkoutRoutineCardBuilder';
+import { WhatsappAutoResponderBuilderDemo } from '../tools/WhatsappAutoResponderBuilder';
+import { KitchenDisplayTicketSystemDemo } from '../tools/KitchenDisplayTicketSystem';
+import { SmartTravelItineraryBuilderDemo } from '../tools/SmartTravelItineraryBuilder';
+import { TourGroupWaCoordinatorDemo } from '../tools/TourGroupWaCoordinator';
+import { CurrencyBudgetTravelTrackerDemo } from '../tools/CurrencyBudgetTravelTracker';
+import { CarMaintenanceMileageLoggerDemo } from '../tools/CarMaintenanceMileageLogger';
+import { UsedCarInspectionReportGenDemo } from '../tools/UsedCarInspectionReportGen';
+import { CropWateringScheduleCalcDemo } from '../tools/CropWateringScheduleCalc';
+import { GreenhouseClimateLoggerDemo } from '../tools/GreenhouseClimateLogger';
+import { FertilizerMixRatioCalcDemo } from '../tools/FertilizerMixRatioCalc';
+import { ClientProjectBriefBuilderDemo } from '../tools/ClientProjectBriefBuilder';
+import { ScopeCreepChangeOrderGenDemo } from '../tools/ScopeCreepChangeOrderGen';
+import { MilestonePaymentTrackerDemo } from '../tools/MilestonePaymentTracker';
+import { TelegramDiscordAlertRelayDemo } from '../tools/TelegramDiscordAlertRelay';
 import ErrorBoundary from './ErrorBoundary';
 import { GenericToolSimulator } from '../tools/GenericToolSimulator';
 import { ReviewSection } from './ReviewSection';
@@ -57,8 +113,120 @@ export function DemoViewer({ product, onClose, onOpenWhitelabel, onBuy }: DemoVi
         return <PdfChatDemo />;
       case 'seo-meta-gen':
         return <SeoMetaGeneratorDemo />;
+      case 'saas-runway-calculator':
+        return <SaasRunwayCalculatorDemo />;
+      case 'real-estate-roi-calculator':
+        return <RealEstateRoiCalculatorDemo />;
+      case 'ecom-tax-profit-auditor':
+        return <EcomTaxProfitAuditorDemo />;
+      case 'vendor-evaluation-matrix':
+        return <VendorEvaluationMatrixDemo />;
+      case 'fleet-fuel-consumption-tracker':
+        return <FleetFuelTrackerDemo />;
+      case 'recipe-costing-profit-margin':
+        return <RecipeCostingCalculatorDemo />;
+      case 'eta-einvoice-json-validator':
+        return <EtaEInvoiceValidatorDemo />;
+      case 'api-key-leak-scanner':
+        return <ApiKeyLeakScannerDemo />;
+      case 'tenant-lease-expiration-tracker':
+        return <TenantLeaseTrackerDemo />;
+      case 'webhook-payload-transformer':
+        return <WebhookPayloadTransformerDemo />;
+      case 'instapay-bank-reconciler':
+        return <InstapayBankReconcilerDemo />;
+      case 'json-to-typescript-zod':
+        return <JsonToTypescriptZodDemo />;
+      case 'github-readme-super-generator':
+        return <GithubReadmeGeneratorDemo />;
+      case 'cookie-consent-gdpr-banner':
+        return <CookieConsentBannerDemo />;
+      case 'utm-campaign-roi-tracker':
+        return <UtmCampaignRoiTrackerDemo />;
+      case 'schema-markup-jsonld-builder':
+        return <SchemaMarkupBuilderDemo />;
+      case 'broken-link-redirect-mapper':
+        return <BrokenLinkRedirectMapperDemo />;
+      case 'freelance-hourly-rate-calc':
+        return <FreelanceHourlyRateCalculatorDemo />;
+      case 'macro-calorie-custom-meal-gen':
+        return <MacroCalorieMealGeneratorDemo />;
+      case 'warehouse-bin-locator-qr':
+        return <WarehouseBinLocatorDemo />;
+      case 'unboxing-review-card-maker':
+        return <UnboxingReviewCardMakerDemo />;
+      case 'smart-file-batch-renamer':
+        return <SmartFileBatchRenamerDemo />;
+      case 'onboarding-checklist-bot':
+        return <OnboardingChecklistBotDemo />;
+      case 'remote-team-burnout-pulse':
+        return <RemoteTeamBurnoutPulseDemo />;
+      case 'social-banner-auto-resizer':
+        return <SocialBannerAutoResizerDemo />;
+      case 'vector-icon-palette-recolor':
+        return <VectorIconPaletteRecolorDemo />;
+      case 'api-mock-endpoint-builder':
+        return <ApiMockEndpointBuilderDemo />;
+      case 'churn-prediction-radar':
+        return <ChurnPredictionRadarDemo />;
+      case 'fine-tuning-dataset-cleaner':
+        return <FineTuningDatasetCleanerDemo />;
+      case 'qr-ticket-checkin-scanner':
+        return <QrTicketCheckinScannerDemo />;
+      case 'dynamic-drm-video-watermark':
+        return <DynamicDrmVideoWatermarkDemo />;
+      case 'soundbite-quote-visualizer':
+        return <SoundbiteQuoteVisualizerDemo />;
+      case 'property-brochure-ai-builder':
+        return <PropertyBrochureBuilderDemo />;
+      case 'symptom-triage-intake-form':
+        return <SymptomTriageIntakeFormDemo />;
+      case 'delivery-cost-route-optimizer':
+        return <DeliveryCostRouteOptimizerDemo />;
+      case 'badge-name-tag-bulk-printer':
+        return <BadgeNameTagBulkPrinterDemo />;
+      case 'certificate-bulk-generator':
+        return <CertificateBulkGeneratorDemo />;
+      case 'csat-feedback-survey-widget':
+        return <CsatFeedbackSurveyWidgetDemo />;
+      case 'canned-response-snippet-manager':
+        return <CannedResponseSnippetManagerDemo />;
+      case 'smart-table-ordering-qr':
+        return <SmartTableOrderingQrDemo />;
+      case 'speaker-agenda-builder':
+        return <SpeakerAgendaBuilderDemo />;
+      case 'workout-routine-card-builder':
+        return <WorkoutRoutineCardBuilderDemo />;
+      case 'whatsapp-auto-responder-builder':
+        return <WhatsappAutoResponderBuilderDemo />;
+      case 'kitchen-display-ticket-system':
+        return <KitchenDisplayTicketSystemDemo />;
+      case 'smart-travel-itinerary-builder':
+        return <SmartTravelItineraryBuilderDemo />;
+      case 'tour-group-wa-coordinator':
+        return <TourGroupWaCoordinatorDemo />;
+      case 'currency-budget-travel-tracker':
+        return <CurrencyBudgetTravelTrackerDemo />;
+      case 'car-maintenance-mileage-logger':
+        return <CarMaintenanceMileageLoggerDemo />;
+      case 'used-car-inspection-report-gen':
+        return <UsedCarInspectionReportGenDemo />;
+      case 'crop-watering-schedule-calc':
+        return <CropWateringScheduleCalcDemo />;
+      case 'greenhouse-climate-logger':
+        return <GreenhouseClimateLoggerDemo />;
+      case 'fertilizer-mix-ratio-calc':
+        return <FertilizerMixRatioCalcDemo />;
+      case 'client-project-brief-builder':
+        return <ClientProjectBriefBuilderDemo />;
+      case 'scope-creep-change-order-gen':
+        return <ScopeCreepChangeOrderGenDemo />;
+      case 'milestone-payment-tracker':
+        return <MilestonePaymentTrackerDemo />;
+      case 'telegram-discord-alert-relay':
+        return <TelegramDiscordAlertRelayDemo />;
       default:
-        // محاكي عام لجميع الأدوات الـ 490 التي تم توليدها
+        // محاكي عام لبقية الأدوات التي لم تُبنَ بعد كأداة حقيقية مخصصة
         return <GenericToolSimulator product={product} />;
     }
   };

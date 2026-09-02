@@ -32,17 +32,15 @@ export const saasBundles: Bundle[] = [
     id: 'bundle-ecommerce-pro',
     title: 'حزمة التاجر الرقمي الشاملة (E-Commerce Mega Pack)',
     badge: 'الأكثر مبيعاً 🔥',
-    description: 'كل ما تحتاجه لإدارة متجر إلكتروني وزيادة المبيعات واستعادة السلات المتروكة وتقليل مرتجعات الشحن.',
-    productIds: ['qr-menu-maker', 'abandoned-cart-wa-recovery', 'rto-fraud-phone-checker', 'social-comment-order-bot', 'unboxing-review-card-maker'],
+    description: 'كل ما تحتاجه لالتقاط الطلبات من التعليقات والرسائل، وتحويل الزوار لعملاء عبر بطاقات الشكر وقوائم QR التفاعلية.',
+    productIds: ['qr-menu-maker', 'social-comment-order-bot', 'unboxing-review-card-maker'],
     productTitles: [
-      'روبوت استعادة السلات المتروكة عبر واتساب',
-      'كاشف ومُقلل مرتجعات الشحن (COD Defender)',
       'مُلتقط أوردرات الكومنتات والرسائل الذكي',
       'صانع بطاقات الشكر وطلب تقييمات خرائط جوجل',
       'صانع منيو الباركود الرقمي التفاعلي (QR Menu)'
     ],
-    originalPriceUsd: 187,
-    bundlePriceUsd: 79,
+    originalPriceUsd: 89,
+    bundlePriceUsd: 37,
     discountPercentage: 58,
     icon: 'ShoppingBag',
     gradient: 'from-indigo-600 via-indigo-700 to-purple-800'
@@ -70,17 +68,16 @@ export const saasBundles: Bundle[] = [
     id: 'bundle-marketing-content',
     title: 'حزمة وكالات التسويق وصناع المحتوى (Viral Growth Engine)',
     badge: 'نمو سريع 🚀',
-    description: 'أدوات توليد المحتوى، تحويل المقالات لكتب إلكترونية، تفريغ الاجتماعات، وصناعة الكاروسيل والفيديوهات.',
-    productIds: ['ai-content-gen', 'ai-lead-magnet-funnel', 'thread-to-carousel-converter', 'arabic-meeting-minutes-transcriber', 'viral-hook-headline-tester'],
+    description: 'أدوات توليد المحتوى، تحويل الأفكار لكتب إلكترونية جاذبة للعملاء، وتفريغ الاجتماعات، واختبار جاذبية العناوين قبل النشر.',
+    productIds: ['ai-content-gen', 'ai-lead-magnet-funnel', 'arabic-meeting-minutes-transcriber', 'viral-hook-headline-tester'],
     productTitles: [
       'مُوَلِّد خطط المحتوى التسويقي المتخصص',
       'صانع نماذج استقطاب العملاء والكتب الإلكترونية',
-      'محول الثريدات إلى تصاميم كاروسيل إنستجرام',
       'مُفرغ الاجتماعات والمحاضر باللهجة العامية',
       'مُختبر العناوين الجاذبة (Viral Hooks)'
     ],
-    originalPriceUsd: 183,
-    bundlePriceUsd: 75,
+    originalPriceUsd: 154,
+    bundlePriceUsd: 63,
     discountPercentage: 59,
     icon: 'Sparkles',
     gradient: 'from-amber-600 via-rose-700 to-indigo-900'

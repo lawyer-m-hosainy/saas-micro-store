@@ -320,7 +320,7 @@ export function AdminDashboard({
                         id: order.productId,
                         title: order.productTitle,
                         description: '',
-                        price: order.amountUsd,
+                        price: order.amountEgp,
                         features: [],
                         icon: 'Sparkles',
                         categoryId: 'all'
@@ -346,8 +346,18 @@ export function AdminDashboard({
                           <td className="p-4">
                             <div className="font-bold text-gray-900">{order.productTitle}</div>
                             <div className="text-emerald-700 font-black text-xs mt-0.5">
-                              {order.amountEgp} ج.م <span className="text-[10px] text-gray-400">(${order.amountUsd})</span>
+                              {order.amountEgp} ج.م
                             </div>
+                            {order.receiptImage && (
+                              <a
+                                href={order.receiptImage}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-[10px] text-indigo-600 font-bold hover:underline"
+                              >
+                                عرض إيصال التحويل
+                              </a>
+                            )}
                           </td>
 
                           <td className="p-4">

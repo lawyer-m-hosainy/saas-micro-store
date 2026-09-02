@@ -43,7 +43,7 @@ export function OrderTracking({ products, onOpenTool }: OrderTrackingProps) {
         id: selectedOrder.productId,
         title: selectedOrder.productTitle,
         description: 'أداة برمجية مرخصة',
-        price: selectedOrder.amountUsd,
+        price: selectedOrder.amountEgp,
         features: ['الكود المصدري كاملاً', 'ترخيص تجاري مدى الحياة'],
         icon: 'Sparkles',
         categoryId: 'all'

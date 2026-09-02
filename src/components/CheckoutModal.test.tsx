@@ -47,7 +47,6 @@ describe('CheckoutModal', () => {
         buyerPhone: '01012345678',
         senderAccount: '01012345678',
         amountEgp: 1450,
-        amountUsd: 29,
         status: 'pending',
       }),
     });
@@ -77,5 +76,47 @@ describe('CheckoutModal', () => {
     await waitFor(() => expect(screen.getByText('Missing required order fields')).toBeInTheDocument());
     expect(screen.queryByText('تم تسجيل طلبك بنجاح!')).not.toBeInTheDocument();
     expect(onOrderCreated).not.toHaveBeenCalled();
+  });
+
+  it('rejects a non-image receipt file without showing a preview', async () => {
+    renderModal();
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const textFile = new File(['not an image'], 'receipt.txt', { type: 'text/plain' });
+    fireEvent.change(input, { target: { files: [textFile] } });
+
+    await waitFor(() => expect(screen.getByText(/يُسمح فقط بملفات الصور/)).toBeInTheDocument());
+    expect(screen.queryByAltText('معاينة إيصال التحويل')).not.toBeInTheDocument();
+  });
+
+  it('includes the receipt image as base64 in the order payload once attached', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        id: '#ORD-555555',
+        productId: mockProduct.id,
+        productTitle: mockProduct.title,
+        buyerName: 'أحمد سامي',
+        buyerEmail: 'ahmed@example.com',
+        buyerPhone: '01012345678',
+        senderAccount: '01012345678',
+        amountEgp: 1450,
+        status: 'pending',
+      }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    renderModal();
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const imageFile = new File(['fake-image-bytes'], 'receipt.png', { type: 'image/png' });
+    fireEvent.change(input, { target: { files: [imageFile] } });
+
+    await waitFor(() => expect(screen.getByText('receipt.png')).toBeInTheDocument());
+
+    fillBuyerForm();
+    fireEvent.click(screen.getByText(/تأكيد تسجيل طلب الشراء الآن/));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body.receiptImage).toMatch(/^data:image\/png;base64,/);
   });
 });

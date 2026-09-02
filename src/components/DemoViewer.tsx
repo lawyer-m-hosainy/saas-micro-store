@@ -22,6 +22,16 @@ import { EtaEInvoiceValidatorDemo } from '../tools/EtaEInvoiceValidator';
 import { ApiKeyLeakScannerDemo } from '../tools/ApiKeyLeakScanner';
 import { TenantLeaseTrackerDemo } from '../tools/TenantLeaseTracker';
 import { WebhookPayloadTransformerDemo } from '../tools/WebhookPayloadTransformer';
+import { InstapayBankReconcilerDemo } from '../tools/InstapayBankReconciler';
+import { JsonToTypescriptZodDemo } from '../tools/JsonToTypescriptZod';
+import { GithubReadmeGeneratorDemo } from '../tools/GithubReadmeGenerator';
+import { CookieConsentBannerDemo } from '../tools/CookieConsentBanner';
+import { UtmCampaignRoiTrackerDemo } from '../tools/UtmCampaignRoiTracker';
+import { SchemaMarkupBuilderDemo } from '../tools/SchemaMarkupBuilder';
+import { BrokenLinkRedirectMapperDemo } from '../tools/BrokenLinkRedirectMapper';
+import { FreelanceHourlyRateCalculatorDemo } from '../tools/FreelanceHourlyRateCalculator';
+import { MacroCalorieMealGeneratorDemo } from '../tools/MacroCalorieMealGenerator';
+import { WarehouseBinLocatorDemo } from '../tools/WarehouseBinLocator';
 import ErrorBoundary from './ErrorBoundary';
 import { GenericToolSimulator } from '../tools/GenericToolSimulator';
 import { ReviewSection } from './ReviewSection';
@@ -87,6 +97,26 @@ export function DemoViewer({ product, onClose, onOpenWhitelabel, onBuy }: DemoVi
         return <TenantLeaseTrackerDemo />;
       case 'webhook-payload-transformer':
         return <WebhookPayloadTransformerDemo />;
+      case 'instapay-bank-reconciler':
+        return <InstapayBankReconcilerDemo />;
+      case 'json-to-typescript-zod':
+        return <JsonToTypescriptZodDemo />;
+      case 'github-readme-super-generator':
+        return <GithubReadmeGeneratorDemo />;
+      case 'cookie-consent-gdpr-banner':
+        return <CookieConsentBannerDemo />;
+      case 'utm-campaign-roi-tracker':
+        return <UtmCampaignRoiTrackerDemo />;
+      case 'schema-markup-jsonld-builder':
+        return <SchemaMarkupBuilderDemo />;
+      case 'broken-link-redirect-mapper':
+        return <BrokenLinkRedirectMapperDemo />;
+      case 'freelance-hourly-rate-calc':
+        return <FreelanceHourlyRateCalculatorDemo />;
+      case 'macro-calorie-custom-meal-gen':
+        return <MacroCalorieMealGeneratorDemo />;
+      case 'warehouse-bin-locator-qr':
+        return <WarehouseBinLocatorDemo />;
       default:
         // محاكي عام لبقية الأدوات التي لم تُبنَ بعد كأداة حقيقية مخصصة
         return <GenericToolSimulator product={product} />;

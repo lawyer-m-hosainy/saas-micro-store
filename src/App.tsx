@@ -42,6 +42,7 @@ function MainApp() {
 
   // Navigation & Auth state
   const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isAdvertiseOpen, setIsAdvertiseOpen] = useState(false);
   const [isTermsOpen, setIsTermsOpen] = useState(false);
   const isLoggedIn = !!user;
@@ -60,58 +61,44 @@ function MainApp() {
     return initialProducts;
   });
 
-  // Orders State (Persisted in localStorage with realistic initial sample orders)
-  const [orders, setOrders] = useState<Order[]>(() => {
-    const saved = localStorage.getItem('micro_saas_store_orders');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        // fallback
-      }
+  // Orders state — fetched from the server for the admin dashboard; new orders are
+  // persisted via POST /api/orders (see CheckoutModal) and appended here optimistically.
+  const [orders, setOrders] = useState<Order[]>([]);
+
+  const fetchAdminOrders = async () => {
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) return;
+      const res = await fetch('/api/orders', { headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) setOrders(await res.json());
+    } catch (error) {
+      console.error('Failed to fetch orders:', error);
     }
-    return [
-      {
-        id: '#ORD-849201',
-        productId: 'tax-eta-prep',
-        productTitle: 'مُهيئ وفاحص فواتير ETA JSON',
-        buyerName: 'م. أحمد ممدوح',
-        buyerEmail: 'ahmed.mamdouh@gmail.com',
-        buyerPhone: '01012345678',
-        senderAccount: '01012345678 (فودافون كاش)',
-        amountEgp: 1450,
-        amountUsd: 29,
-        createdAt: 'اليوم، 09:30 ص',
-        status: 'pending'
-      },
-      {
-        id: '#ORD-719324',
-        productId: 'lead-magnet-creator',
-        productTitle: 'صانع الكتب وصفحات الهبوط المغناطيسية',
-        buyerName: 'طارق حسام (وكالة كريتيف)',
-        buyerEmail: 'tarek@creative-agency.com',
-        buyerPhone: '01298765432',
-        senderAccount: 'tarek@instapay (إنستاباي)',
-        amountEgp: 1450,
-        amountUsd: 29,
-        createdAt: 'أمس، 04:15 م',
-        status: 'completed'
-      }
-    ];
-  });
+  };
 
   useEffect(() => {
-    try {
-      localStorage.setItem('micro_saas_store_orders', JSON.stringify(orders));
-    } catch (e) {}
-  }, [orders]);
+    if (isAdmin) fetchAdminOrders();
+  }, [isAdmin]);
 
   const handleOrderCreated = (newOrder: Order) => {
     setOrders(prev => [newOrder, ...prev]);
   };
 
-  const handleUpdateOrderStatus = (orderId: string, status: Order['status']) => {
-    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
+  const handleUpdateOrderStatus = async (orderId: string, status: Order['status']) => {
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) return;
+      const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status }),
+      });
+      if (res.ok) {
+        setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
+      }
+    } catch (error) {
+      console.error('Failed to update order status:', error);
+    }
   };
 
   // Tools/Products state
@@ -122,6 +109,7 @@ function MainApp() {
   // Purchased products state (from DB)
   const [purchasedIds, setPurchasedIds] = useState<string[]>([]);
   const purchasedProducts = useMemo(() => productsList.filter(p => purchasedIds.includes(p.id)), [productsList, purchasedIds]);
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -129,16 +117,20 @@ function MainApp() {
       if (currentUser) {
         try {
           const token = await currentUser.getIdToken();
-          
+
           // Sync user with backend
-          await fetch('/api/auth/sync', {
+          const syncRes = await fetch('/api/auth/sync', {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`
             }
           });
-
-
+          if (syncRes.ok) {
+            const syncData = await syncRes.json();
+            setIsAdmin(!!syncData.isAdmin);
+          } else {
+            setIsAdmin(false);
+          }
 
           // Fetch user's purchases
           const res = await fetch('/api/purchases', {
@@ -146,17 +138,20 @@ function MainApp() {
               'Authorization': `Bearer ${token}`
             }
           });
-          
+
           if (res.ok) {
             const ids = await res.json();
             setPurchasedIds(ids);
           }
         } catch (error) {
           console.error("Error syncing user or fetching purchases", error);
+          setIsAdmin(false);
         }
       } else {
         setPurchasedIds([]);
+        setIsAdmin(false);
       }
+      setAuthChecked(true);
     });
     return () => unsubscribe();
   }, [navigate]);
@@ -457,21 +452,22 @@ function MainApp() {
           <Route path="/local-sellers" element={<LocalSellers />} />
           
           <Route path="/tracking" element={
-            <OrderTracking 
-              orders={orders}
+            <OrderTracking
               products={productsList}
               onOpenTool={(p) => navigate(`/product/${p.id}`)}
             />
           } />
           
           <Route path="/admin" element={
-            <AdminDashboard
-              products={productsList}
-              orders={orders}
-              onAddProduct={handleAddProduct}
-              onDeleteProduct={handleDeleteProduct}
-              onUpdateOrderStatus={handleUpdateOrderStatus}
-            />
+            <RequireAdmin authChecked={authChecked} isAdmin={isAdmin}>
+              <AdminDashboard
+                products={productsList}
+                orders={orders}
+                onAddProduct={handleAddProduct}
+                onDeleteProduct={handleDeleteProduct}
+                onUpdateOrderStatus={handleUpdateOrderStatus}
+              />
+            </RequireAdmin>
           } />
         </Routes>
       </main>
@@ -552,4 +548,23 @@ function MainApp() {
       <SupportChatbot />
     </div>
   );
+}
+
+/** يمنع أي مستخدم غير مسجل كأدمن (وفق ADMIN_EMAILS في السيرفر) من رؤية لوحة تحكم الإدارة */
+function RequireAdmin({ authChecked, isAdmin, children }: { authChecked: boolean; isAdmin: boolean; children: React.ReactNode }) {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (authChecked && !isAdmin) {
+      navigate('/', { replace: true });
+    }
+  }, [authChecked, isAdmin, navigate]);
+
+  if (!authChecked) {
+    return <div className="py-24 text-center text-gray-400 text-sm">جاري التحقق من الصلاحيات...</div>;
+  }
+  if (!isAdmin) {
+    return null;
+  }
+  return <>{children}</>;
 }

@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, timestamp, integer, doublePrecision } from "drizzle-orm/pg-core";
 
 // Needs index creation via migration:
 // CREATE INDEX IF NOT EXISTS user_id_idx ON purchases (user_id);
@@ -35,5 +35,19 @@ export const coupons = pgTable('coupons', {
   discountPercent: integer('discount_percent').notNull(),
   isActive: integer('is_active').default(1).notNull(), // SQLite/PG cross compatible boolean (1=true, 0=false)
   usageCount: integer('usage_count').default(0).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const orders = pgTable('orders', {
+  id: text('id').primaryKey(), // e.g. "#ORD-849201"
+  productId: text('product_id').notNull(),
+  productTitle: text('product_title').notNull(),
+  buyerName: text('buyer_name').notNull(),
+  buyerEmail: text('buyer_email').notNull(),
+  buyerPhone: text('buyer_phone').notNull(),
+  senderAccount: text('sender_account').notNull(),
+  amountEgp: integer('amount_egp').notNull(),
+  amountUsd: doublePrecision('amount_usd').notNull(),
+  status: text('status').notNull().default('pending'), // pending | processing | completed | cancelled
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });

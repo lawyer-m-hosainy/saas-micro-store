@@ -6,36 +6,36 @@ import { LicenseCertificateModal } from './LicenseCertificateModal';
 import { downloadProductZip } from '../utils/zipGenerator';
 
 interface OrderTrackingProps {
-  orders: Order[];
   products: Product[];
   onOpenTool?: (product: Product) => void;
 }
 
-export function OrderTracking({ orders, products, onOpenTool }: OrderTrackingProps) {
+export function OrderTracking({ products, onOpenTool }: OrderTrackingProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [showCertProduct, setShowCertProduct] = useState<Product | null>(null);
   const [downloading, setDownloading] = useState(false);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    setHasSearched(true);
-    const query = searchQuery.trim().toLowerCase();
-    
+    const query = searchQuery.trim();
     if (!query) {
       setSelectedOrder(null);
       return;
     }
 
-    const found = orders.find(
-      (o) => 
-        o.id.toLowerCase() === query.toLowerCase() ||
-        o.buyerPhone === query ||
-        o.buyerEmail.toLowerCase() === query
-    );
-
-    setSelectedOrder(found || null);
+    setIsSearching(true);
+    try {
+      const res = await fetch(`/api/orders/track?q=${encodeURIComponent(query)}`);
+      setSelectedOrder(res.ok ? await res.json() : null);
+    } catch (err) {
+      setSelectedOrder(null);
+    } finally {
+      setIsSearching(false);
+      setHasSearched(true);
+    }
   };
 
   const currentMatchedProduct = selectedOrder 
@@ -95,10 +95,11 @@ export function OrderTracking({ orders, products, onOpenTool }: OrderTrackingPro
           </div>
           <button
             type="submit"
-            className="bg-indigo-900 hover:bg-indigo-950 text-white font-black px-8 py-3.5 rounded-2xl text-xs sm:text-sm shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 flex-shrink-0"
+            disabled={isSearching}
+            className="bg-indigo-900 hover:bg-indigo-950 text-white font-black px-8 py-3.5 rounded-2xl text-xs sm:text-sm shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 flex-shrink-0 disabled:opacity-60"
           >
             <Search size={16} />
-            <span>بحث عن الطلب</span>
+            <span>{isSearching ? 'جاري البحث...' : 'بحث عن الطلب'}</span>
           </button>
         </div>
       </form>

@@ -3,13 +3,14 @@ import express from 'express';
 import path from 'path';
 import cors from 'cors';
 import { createServer as createViteServer } from 'vite';
-import { requireAuth, AuthRequest } from './src/middleware/auth';
+import { requireAuth, requireAdmin, isAdminEmail, AuthRequest } from './src/middleware/auth';
 import { getOrCreateUser } from './src/db/users';
 import { db } from './src/db';
-import { purchases, users, reviews, coupons } from './src/db/schema';
-import { eq, and, desc } from 'drizzle-orm';
+import { purchases, users, reviews, coupons, orders } from './src/db/schema';
+import { eq, and, or, ilike, desc } from 'drizzle-orm';
 import { GoogleGenAI } from '@google/genai';
 import { products as catalogProducts } from './src/data.js';
+import { notifyNewOrder } from './src/server/notifications';
 
 const genAI = process.env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY, httpOptions: { headers: { 'User-Agent': 'aistudio-build' } } }) : null;
 
@@ -27,7 +28,7 @@ async function startServer() {
     try {
       const user = req.user!;
       const dbUser = await getOrCreateUser(user.uid, user.email || '', user.name);
-      res.json({ success: true, user: dbUser });
+      res.json({ success: true, user: dbUser, isAdmin: isAdminEmail(user.email) });
     } catch (error: any) {
       console.error('Failed to sync user:', error);
       res.status(500).json({ error: 'Internal server error' });
@@ -67,7 +68,7 @@ async function startServer() {
   });
 
   // Admin: Get all coupons
-  app.get('/api/coupons', requireAuth, async (req, res) => {
+  app.get('/api/coupons', requireAuth, requireAdmin, async (req, res) => {
     try {
       const allCoupons = await db.select().from(coupons).orderBy(desc(coupons.createdAt));
       res.json(allCoupons);
@@ -78,20 +79,111 @@ async function startServer() {
   });
 
   // Admin: Create new coupon
-  app.post('/api/coupons', requireAuth, async (req, res) => {
+  app.post('/api/coupons', requireAuth, requireAdmin, async (req, res) => {
     try {
       const { code, discountPercent } = req.body;
       if (!code || !discountPercent) return res.status(400).json({ error: 'Missing data' });
-      
+
+      const parsedDiscount = parseInt(discountPercent);
+      if (!Number.isFinite(parsedDiscount) || parsedDiscount < 1 || parsedDiscount > 90) {
+        return res.status(400).json({ error: 'discountPercent must be between 1 and 90' });
+      }
+
       const newCoupon = await db.insert(coupons).values({
         code: code.toUpperCase(),
-        discountPercent: parseInt(discountPercent),
+        discountPercent: parsedDiscount,
         isActive: 1
       }).returning();
       
       res.json(newCoupon[0]);
     } catch (error) {
       console.error('Failed to create coupon:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  const ORDER_STATUSES = ['pending', 'processing', 'completed', 'cancelled'];
+
+  // Create a new order (called from checkout — no login required, matches the store's buy flow)
+  app.post('/api/orders', async (req, res) => {
+    try {
+      const { productId, productTitle, buyerName, buyerEmail, buyerPhone, senderAccount, amountEgp, amountUsd } = req.body;
+
+      if (!productId || !productTitle || !buyerName || !buyerEmail || !buyerPhone || !senderAccount) {
+        return res.status(400).json({ error: 'Missing required order fields' });
+      }
+      const parsedAmountEgp = Number(amountEgp);
+      const parsedAmountUsd = Number(amountUsd);
+      if (!Number.isFinite(parsedAmountEgp) || parsedAmountEgp <= 0 || !Number.isFinite(parsedAmountUsd) || parsedAmountUsd <= 0) {
+        return res.status(400).json({ error: 'Invalid order amount' });
+      }
+
+      const orderId = `#ORD-${Math.floor(100000 + Math.random() * 900000)}`;
+      const [newOrder] = await db.insert(orders).values({
+        id: orderId,
+        productId,
+        productTitle,
+        buyerName,
+        buyerEmail,
+        buyerPhone,
+        senderAccount,
+        amountEgp: Math.round(parsedAmountEgp),
+        amountUsd: Math.round(parsedAmountUsd * 100) / 100,
+        status: 'pending',
+      }).returning();
+
+      notifyNewOrder(newOrder).catch((err) => console.error('Order notification failed:', err));
+
+      res.json(newOrder);
+    } catch (error) {
+      console.error('Failed to create order:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Admin: list all orders
+  app.get('/api/orders', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const allOrders = await db.select().from(orders).orderBy(desc(orders.createdAt));
+      res.json(allOrders);
+    } catch (error) {
+      console.error('Failed to fetch orders:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Public: track a single order by its id, phone, or email (matches the order-tracking search page)
+  app.get('/api/orders/track', async (req, res) => {
+    try {
+      const query = (req.query.q as string || '').trim();
+      if (!query) return res.status(400).json({ error: 'Missing search query' });
+
+      const [found] = await db.select().from(orders).where(
+        or(ilike(orders.id, query), eq(orders.buyerPhone, query), ilike(orders.buyerEmail, query))
+      ).limit(1);
+
+      if (!found) return res.status(404).json({ error: 'لم يتم العثور على طلب بهذه البيانات' });
+      res.json(found);
+    } catch (error) {
+      console.error('Failed to track order:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Admin: update an order's status
+  app.patch('/api/orders/:id/status', requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const id = String(req.params.id);
+      const { status } = req.body;
+      if (!ORDER_STATUSES.includes(status)) {
+        return res.status(400).json({ error: 'Invalid status' });
+      }
+
+      const [updated] = await db.update(orders).set({ status }).where(eq(orders.id, id)).returning();
+      if (!updated) return res.status(404).json({ error: 'Order not found' });
+      res.json(updated);
+    } catch (error) {
+      console.error('Failed to update order status:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
   });

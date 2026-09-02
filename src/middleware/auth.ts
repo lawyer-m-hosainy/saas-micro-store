@@ -30,3 +30,24 @@ export const requireAuth = async (
     return res.status(401).json({ error: 'Unauthorized: Invalid token' });
   }
 };
+
+/** يحدد قائمة إيميلات الأدمن المسموح لها من متغير البيئة ADMIN_EMAILS (مفصولة بفواصل) */
+function getAdminEmails(): string[] {
+  return (process.env.ADMIN_EMAILS || '')
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+export function isAdminEmail(email?: string | null): boolean {
+  if (!email) return false;
+  return getAdminEmails().includes(email.toLowerCase());
+}
+
+/** يُستخدم بعد requireAuth للتأكد إن المستخدم المسجل دخوله ضمن قائمة إيميلات الأدمن، وليس مجرد مستخدم مسجل دخوله */
+export const requireAdmin = (req: AuthRequest, res: Response, next: NextFunction) => {
+  if (!isAdminEmail(req.user?.email)) {
+    return res.status(403).json({ error: 'Forbidden: Admins only' });
+  }
+  next();
+};

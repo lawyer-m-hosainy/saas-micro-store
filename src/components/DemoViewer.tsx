@@ -42,6 +42,16 @@ import { ApiMockEndpointBuilderDemo } from '../tools/ApiMockEndpointBuilder';
 import { ChurnPredictionRadarDemo } from '../tools/ChurnPredictionRadar';
 import { FineTuningDatasetCleanerDemo } from '../tools/FineTuningDatasetCleaner';
 import { QrTicketCheckinScannerDemo } from '../tools/QrTicketCheckinScanner';
+import { DynamicDrmVideoWatermarkDemo } from '../tools/DynamicDrmVideoWatermark';
+import { SoundbiteQuoteVisualizerDemo } from '../tools/SoundbiteQuoteVisualizer';
+import { PropertyBrochureBuilderDemo } from '../tools/PropertyBrochureBuilder';
+import { SymptomTriageIntakeFormDemo } from '../tools/SymptomTriageIntakeForm';
+import { DeliveryCostRouteOptimizerDemo } from '../tools/DeliveryCostRouteOptimizer';
+import { BadgeNameTagBulkPrinterDemo } from '../tools/BadgeNameTagBulkPrinter';
+import { CertificateBulkGeneratorDemo } from '../tools/CertificateBulkGenerator';
+import { CsatFeedbackSurveyWidgetDemo } from '../tools/CsatFeedbackSurveyWidget';
+import { CannedResponseSnippetManagerDemo } from '../tools/CannedResponseSnippetManager';
+import { SmartTableOrderingQrDemo } from '../tools/SmartTableOrderingQr';
 import ErrorBoundary from './ErrorBoundary';
 import { GenericToolSimulator } from '../tools/GenericToolSimulator';
 import { ReviewSection } from './ReviewSection';
@@ -147,6 +157,26 @@ export function DemoViewer({ product, onClose, onOpenWhitelabel, onBuy }: DemoVi
         return <FineTuningDatasetCleanerDemo />;
       case 'qr-ticket-checkin-scanner':
         return <QrTicketCheckinScannerDemo />;
+      case 'dynamic-drm-video-watermark':
+        return <DynamicDrmVideoWatermarkDemo />;
+      case 'soundbite-quote-visualizer':
+        return <SoundbiteQuoteVisualizerDemo />;
+      case 'property-brochure-ai-builder':
+        return <PropertyBrochureBuilderDemo />;
+      case 'symptom-triage-intake-form':
+        return <SymptomTriageIntakeFormDemo />;
+      case 'delivery-cost-route-optimizer':
+        return <DeliveryCostRouteOptimizerDemo />;
+      case 'badge-name-tag-bulk-printer':
+        return <BadgeNameTagBulkPrinterDemo />;
+      case 'certificate-bulk-generator':
+        return <CertificateBulkGeneratorDemo />;
+      case 'csat-feedback-survey-widget':
+        return <CsatFeedbackSurveyWidgetDemo />;
+      case 'canned-response-snippet-manager':
+        return <CannedResponseSnippetManagerDemo />;
+      case 'smart-table-ordering-qr':
+        return <SmartTableOrderingQrDemo />;
       default:
         // محاكي عام لبقية الأدوات التي لم تُبنَ بعد كأداة حقيقية مخصصة
         return <GenericToolSimulator product={product} />;

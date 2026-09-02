@@ -12,6 +12,16 @@ import { LinkInBioDemo } from '../tools/LinkInBio';
 import { NicheContentDemo } from '../tools/NicheContent';
 import { PdfChatDemo } from '../tools/PdfChat';
 import { SeoMetaGeneratorDemo } from '../tools/SeoMetaGenerator';
+import { SaasRunwayCalculatorDemo } from '../tools/SaasRunwayCalculator';
+import { RealEstateRoiCalculatorDemo } from '../tools/RealEstateRoiCalculator';
+import { EcomTaxProfitAuditorDemo } from '../tools/EcomTaxProfitAuditor';
+import { VendorEvaluationMatrixDemo } from '../tools/VendorEvaluationMatrix';
+import { FleetFuelTrackerDemo } from '../tools/FleetFuelTracker';
+import { RecipeCostingCalculatorDemo } from '../tools/RecipeCostingCalculator';
+import { EtaEInvoiceValidatorDemo } from '../tools/EtaEInvoiceValidator';
+import { ApiKeyLeakScannerDemo } from '../tools/ApiKeyLeakScanner';
+import { TenantLeaseTrackerDemo } from '../tools/TenantLeaseTracker';
+import { WebhookPayloadTransformerDemo } from '../tools/WebhookPayloadTransformer';
 import ErrorBoundary from './ErrorBoundary';
 import { GenericToolSimulator } from '../tools/GenericToolSimulator';
 import { ReviewSection } from './ReviewSection';
@@ -57,8 +67,28 @@ export function DemoViewer({ product, onClose, onOpenWhitelabel, onBuy }: DemoVi
         return <PdfChatDemo />;
       case 'seo-meta-gen':
         return <SeoMetaGeneratorDemo />;
+      case 'saas-runway-calculator':
+        return <SaasRunwayCalculatorDemo />;
+      case 'real-estate-roi-calculator':
+        return <RealEstateRoiCalculatorDemo />;
+      case 'ecom-tax-profit-auditor':
+        return <EcomTaxProfitAuditorDemo />;
+      case 'vendor-evaluation-matrix':
+        return <VendorEvaluationMatrixDemo />;
+      case 'fleet-fuel-consumption-tracker':
+        return <FleetFuelTrackerDemo />;
+      case 'recipe-costing-profit-margin':
+        return <RecipeCostingCalculatorDemo />;
+      case 'eta-einvoice-json-validator':
+        return <EtaEInvoiceValidatorDemo />;
+      case 'api-key-leak-scanner':
+        return <ApiKeyLeakScannerDemo />;
+      case 'tenant-lease-expiration-tracker':
+        return <TenantLeaseTrackerDemo />;
+      case 'webhook-payload-transformer':
+        return <WebhookPayloadTransformerDemo />;
       default:
-        // محاكي عام لجميع الأدوات الـ 490 التي تم توليدها
+        // محاكي عام لبقية الأدوات التي لم تُبنَ بعد كأداة حقيقية مخصصة
         return <GenericToolSimulator product={product} />;
     }
   };

@@ -529,7 +529,7 @@ export function AdminDashboard({
                   type="number"
                   required
                   min="1"
-                  max="100"
+                  max="90"
                   placeholder="20"
                   value={discountPercent}
                   onChange={e => setDiscountPercent(e.target.value)}

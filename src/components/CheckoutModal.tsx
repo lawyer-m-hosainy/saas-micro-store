@@ -22,7 +22,9 @@ export function CheckoutModal({ product, onClose, onOrderCreated }: CheckoutModa
   const [receiptUploaded, setReceiptUploaded] = useState(false);
   const [copiedNumber, setCopiedNumber] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
-  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+
   // Coupon State
   const [couponCode, setCouponCode] = useState('');
   const [discountPercent, setDiscountPercent] = useState(0);
@@ -67,30 +69,57 @@ export function CheckoutModal({ product, onClose, onOrderCreated }: CheckoutModa
     setTimeout(() => setCopiedNumber(false), 2500);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const generatedOrderNum = `#ORD-${Math.floor(100000 + Math.random() * 900000)}`;
-    setOrderNumber(generatedOrderNum);
+    setSubmitError('');
+    setIsSubmitting(true);
 
-    const newOrder: Order = {
-      id: generatedOrderNum,
-      productId: product.id,
-      productTitle: product.title + (includeDeployment ? ' (مع خدمة التركيب السحابي)' : ''),
-      buyerName: buyerData.name,
-      buyerEmail: buyerData.email,
-      buyerPhone: buyerData.phone,
-      senderAccount: buyerData.senderAccount,
-      amountEgp: totalEgpPrice,
-      amountUsd: totalUsdPrice,
-      createdAt: new Date().toLocaleDateString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
-      status: 'pending'
-    };
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: product.id,
+          productTitle: product.title + (includeDeployment ? ' (مع خدمة التركيب السحابي)' : ''),
+          buyerName: buyerData.name,
+          buyerEmail: buyerData.email,
+          buyerPhone: buyerData.phone,
+          senderAccount: buyerData.senderAccount,
+          amountEgp: totalEgpPrice,
+          amountUsd: totalUsdPrice,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setSubmitError(data.error || 'حدث خطأ أثناء تسجيل الطلب، يرجى المحاولة مرة أخرى.');
+        setIsSubmitting(false);
+        return;
+      }
 
-    if (onOrderCreated) {
-      onOrderCreated(newOrder);
+      const newOrder: Order = {
+        id: data.id,
+        productId: data.productId,
+        productTitle: data.productTitle,
+        buyerName: data.buyerName,
+        buyerEmail: data.buyerEmail,
+        buyerPhone: data.buyerPhone,
+        senderAccount: data.senderAccount,
+        amountEgp: data.amountEgp,
+        amountUsd: data.amountUsd,
+        createdAt: new Date().toLocaleDateString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
+        status: data.status,
+      };
+
+      setOrderNumber(newOrder.id);
+      if (onOrderCreated) {
+        onOrderCreated(newOrder);
+      }
+      setIsSuccess(true);
+    } catch (err) {
+      setSubmitError('تعذر الاتصال بالخادم، يرجى التأكد من اتصالك بالإنترنت والمحاولة مرة أخرى.');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsSuccess(true);
   };
 
   const handleSendViaWhatsApp = () => {
@@ -381,13 +410,18 @@ export function CheckoutModal({ product, onClose, onOrderCreated }: CheckoutModa
                 </button>
               </div>
 
+              {submitError && (
+                <p className="text-xs text-red-600 font-bold bg-red-50 border border-red-200 rounded-xl p-3 text-center">{submitError}</p>
+              )}
+
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full bg-indigo-900 hover:bg-indigo-950 text-white font-black py-3.5 px-4 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 mt-4"
+                disabled={isSubmitting}
+                className="w-full bg-indigo-900 hover:bg-indigo-950 text-white font-black py-3.5 px-4 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 mt-4 disabled:opacity-60 disabled:active:scale-100"
               >
                 <CheckCircle2 size={18} className="text-emerald-400" />
-                <span>تأكيد تسجيل طلب الشراء الآن ({totalEgpPrice} ج.م)</span>
+                <span>{isSubmitting ? 'جاري تسجيل الطلب...' : `تأكيد تسجيل طلب الشراء الآن (${totalEgpPrice} ج.م)`}</span>
               </button>
             </form>
 

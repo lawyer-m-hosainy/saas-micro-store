@@ -32,6 +32,16 @@ import { BrokenLinkRedirectMapperDemo } from '../tools/BrokenLinkRedirectMapper'
 import { FreelanceHourlyRateCalculatorDemo } from '../tools/FreelanceHourlyRateCalculator';
 import { MacroCalorieMealGeneratorDemo } from '../tools/MacroCalorieMealGenerator';
 import { WarehouseBinLocatorDemo } from '../tools/WarehouseBinLocator';
+import { UnboxingReviewCardMakerDemo } from '../tools/UnboxingReviewCardMaker';
+import { SmartFileBatchRenamerDemo } from '../tools/SmartFileBatchRenamer';
+import { OnboardingChecklistBotDemo } from '../tools/OnboardingChecklistBot';
+import { RemoteTeamBurnoutPulseDemo } from '../tools/RemoteTeamBurnoutPulse';
+import { SocialBannerAutoResizerDemo } from '../tools/SocialBannerAutoResizer';
+import { VectorIconPaletteRecolorDemo } from '../tools/VectorIconPaletteRecolor';
+import { ApiMockEndpointBuilderDemo } from '../tools/ApiMockEndpointBuilder';
+import { ChurnPredictionRadarDemo } from '../tools/ChurnPredictionRadar';
+import { FineTuningDatasetCleanerDemo } from '../tools/FineTuningDatasetCleaner';
+import { QrTicketCheckinScannerDemo } from '../tools/QrTicketCheckinScanner';
 import ErrorBoundary from './ErrorBoundary';
 import { GenericToolSimulator } from '../tools/GenericToolSimulator';
 import { ReviewSection } from './ReviewSection';
@@ -117,6 +127,26 @@ export function DemoViewer({ product, onClose, onOpenWhitelabel, onBuy }: DemoVi
         return <MacroCalorieMealGeneratorDemo />;
       case 'warehouse-bin-locator-qr':
         return <WarehouseBinLocatorDemo />;
+      case 'unboxing-review-card-maker':
+        return <UnboxingReviewCardMakerDemo />;
+      case 'smart-file-batch-renamer':
+        return <SmartFileBatchRenamerDemo />;
+      case 'onboarding-checklist-bot':
+        return <OnboardingChecklistBotDemo />;
+      case 'remote-team-burnout-pulse':
+        return <RemoteTeamBurnoutPulseDemo />;
+      case 'social-banner-auto-resizer':
+        return <SocialBannerAutoResizerDemo />;
+      case 'vector-icon-palette-recolor':
+        return <VectorIconPaletteRecolorDemo />;
+      case 'api-mock-endpoint-builder':
+        return <ApiMockEndpointBuilderDemo />;
+      case 'churn-prediction-radar':
+        return <ChurnPredictionRadarDemo />;
+      case 'fine-tuning-dataset-cleaner':
+        return <FineTuningDatasetCleanerDemo />;
+      case 'qr-ticket-checkin-scanner':
+        return <QrTicketCheckinScannerDemo />;
       default:
         // محاكي عام لبقية الأدوات التي لم تُبنَ بعد كأداة حقيقية مخصصة
         return <GenericToolSimulator product={product} />;

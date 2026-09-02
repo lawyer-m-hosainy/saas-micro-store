@@ -52,6 +52,22 @@ import { CertificateBulkGeneratorDemo } from '../tools/CertificateBulkGenerator'
 import { CsatFeedbackSurveyWidgetDemo } from '../tools/CsatFeedbackSurveyWidget';
 import { CannedResponseSnippetManagerDemo } from '../tools/CannedResponseSnippetManager';
 import { SmartTableOrderingQrDemo } from '../tools/SmartTableOrderingQr';
+import { SpeakerAgendaBuilderDemo } from '../tools/SpeakerAgendaBuilder';
+import { WorkoutRoutineCardBuilderDemo } from '../tools/WorkoutRoutineCardBuilder';
+import { WhatsappAutoResponderBuilderDemo } from '../tools/WhatsappAutoResponderBuilder';
+import { KitchenDisplayTicketSystemDemo } from '../tools/KitchenDisplayTicketSystem';
+import { SmartTravelItineraryBuilderDemo } from '../tools/SmartTravelItineraryBuilder';
+import { TourGroupWaCoordinatorDemo } from '../tools/TourGroupWaCoordinator';
+import { CurrencyBudgetTravelTrackerDemo } from '../tools/CurrencyBudgetTravelTracker';
+import { CarMaintenanceMileageLoggerDemo } from '../tools/CarMaintenanceMileageLogger';
+import { UsedCarInspectionReportGenDemo } from '../tools/UsedCarInspectionReportGen';
+import { CropWateringScheduleCalcDemo } from '../tools/CropWateringScheduleCalc';
+import { GreenhouseClimateLoggerDemo } from '../tools/GreenhouseClimateLogger';
+import { FertilizerMixRatioCalcDemo } from '../tools/FertilizerMixRatioCalc';
+import { ClientProjectBriefBuilderDemo } from '../tools/ClientProjectBriefBuilder';
+import { ScopeCreepChangeOrderGenDemo } from '../tools/ScopeCreepChangeOrderGen';
+import { MilestonePaymentTrackerDemo } from '../tools/MilestonePaymentTracker';
+import { TelegramDiscordAlertRelayDemo } from '../tools/TelegramDiscordAlertRelay';
 import ErrorBoundary from './ErrorBoundary';
 import { GenericToolSimulator } from '../tools/GenericToolSimulator';
 import { ReviewSection } from './ReviewSection';
@@ -177,6 +193,38 @@ export function DemoViewer({ product, onClose, onOpenWhitelabel, onBuy }: DemoVi
         return <CannedResponseSnippetManagerDemo />;
       case 'smart-table-ordering-qr':
         return <SmartTableOrderingQrDemo />;
+      case 'speaker-agenda-builder':
+        return <SpeakerAgendaBuilderDemo />;
+      case 'workout-routine-card-builder':
+        return <WorkoutRoutineCardBuilderDemo />;
+      case 'whatsapp-auto-responder-builder':
+        return <WhatsappAutoResponderBuilderDemo />;
+      case 'kitchen-display-ticket-system':
+        return <KitchenDisplayTicketSystemDemo />;
+      case 'smart-travel-itinerary-builder':
+        return <SmartTravelItineraryBuilderDemo />;
+      case 'tour-group-wa-coordinator':
+        return <TourGroupWaCoordinatorDemo />;
+      case 'currency-budget-travel-tracker':
+        return <CurrencyBudgetTravelTrackerDemo />;
+      case 'car-maintenance-mileage-logger':
+        return <CarMaintenanceMileageLoggerDemo />;
+      case 'used-car-inspection-report-gen':
+        return <UsedCarInspectionReportGenDemo />;
+      case 'crop-watering-schedule-calc':
+        return <CropWateringScheduleCalcDemo />;
+      case 'greenhouse-climate-logger':
+        return <GreenhouseClimateLoggerDemo />;
+      case 'fertilizer-mix-ratio-calc':
+        return <FertilizerMixRatioCalcDemo />;
+      case 'client-project-brief-builder':
+        return <ClientProjectBriefBuilderDemo />;
+      case 'scope-creep-change-order-gen':
+        return <ScopeCreepChangeOrderGenDemo />;
+      case 'milestone-payment-tracker':
+        return <MilestonePaymentTrackerDemo />;
+      case 'telegram-discord-alert-relay':
+        return <TelegramDiscordAlertRelayDemo />;
       default:
         // محاكي عام لبقية الأدوات التي لم تُبنَ بعد كأداة حقيقية مخصصة
         return <GenericToolSimulator product={product} />;
